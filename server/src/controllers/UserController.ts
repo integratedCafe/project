@@ -8,23 +8,24 @@ const { JWT_SECRET } = config;
 
 class UserController {
     static login = async (req: Request, res: Response, next: NextFunction) => {
-        const { email, password }: { email: string; password: string } =
+        const { phone, password }: { phone: string; password: string } =
             req.body;
 
-        if (!email)
+        if (!phone)
             return res
                 .status(400)
-                .json({ success: false, msg: '이메일을 작성해주세요.' });
+                .json({ success: false, msg: '휴대폰 번호를 작성해주세요.' });
         else if (!password)
             return res
                 .status(400)
                 .json({ success: false, msg: '비밀번호를 작성해주세요.' });
 
-        User.findOne({ email }).then((user) => {
+        User.findOne({ phone }).then((user) => {
             if (!user)
-                return res
-                    .status(400)
-                    .json({ success: false, msg: '이메일을 확인해주세요.' });
+                return res.status(400).json({
+                    success: false,
+                    msg: '휴대폰 번호를 확인해주세요.',
+                });
 
             bcrypt.compare(password, user.password).then((isMatch) => {
                 if (!isMatch)
