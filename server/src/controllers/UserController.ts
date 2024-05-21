@@ -110,6 +110,17 @@ class UserController {
             });
         });
     };
+
+    static withdrawal = async (req: Request, res: Response) => {
+        try {
+            await User.deleteOne({ _id: req.params.id });
+
+            return res.status(200).json({ success: true });
+        } catch (e) {
+            console.log(e);
+            return res.status(400).json({ error: e });
+        }
+    };
 }
 
 export default UserController;
