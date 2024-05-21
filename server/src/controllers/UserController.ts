@@ -6,10 +6,30 @@ import User from '../models/user';
 
 const { JWT_SECRET } = config;
 
+interface ILoginReq {
+    password: string;
+    phone: string;
+}
+
+interface IRegisterReq {
+    name: string;
+    email?: string;
+    password: string;
+    phone: string;
+    nickname: string;
+}
+
+interface IUpdateReq {
+    name: string;
+    nickname: string;
+    isMarketing: boolean;
+    isAppPush: boolean;
+    isLocAgreement: boolean;
+}
+
 class UserController {
     static login = async (req: Request, res: Response, next: NextFunction) => {
-        const { phone, password }: { phone: string; password: string } =
-            req.body;
+        const { phone, password }: ILoginReq = req.body;
 
         if (!phone)
             return res
@@ -56,19 +76,8 @@ class UserController {
     };
 
     static register = async (req: Request, res: Response) => {
-        const {
-            name,
-            email,
-            password,
-            phone,
-            nickname,
-        }: {
-            name: string;
-            email?: string;
-            password: string;
-            phone: string;
-            nickname: string;
-        } = req.body;
+        const { name, email, password, phone, nickname }: IRegisterReq =
+            req.body;
 
         User.findOne({ phone }).then((user) => {
             if (user)
@@ -120,6 +129,37 @@ class UserController {
             console.log(e);
             return res.status(400).json({ error: e });
         }
+    };
+
+    static update = async (req: Request, res: Response) => {
+        const {
+            name,
+            nickname,
+            isMarketing,
+            isAppPush,
+            isLocAgreement,
+        }: IUpdateReq = req.body;
+
+        User.findById(req.params.id).then((user) => {
+            if (!user)
+                return res
+                    .status(400)
+                    .json({ success: false, msg: '유저를 찾을 수 없습니다.' });
+
+            User.findByIdAndUpdate(req.params.id, {
+                name,
+                nickname,
+                isMarketing,
+                isAppPush,
+                isLocAgreement,
+            })
+                .then((user) => {
+                    res.json({ success: true, user });
+                })
+                .catch((err) => {
+                    res.status(400).json({ success: false, msg: err.msg });
+                });
+        });
     };
 }
 
