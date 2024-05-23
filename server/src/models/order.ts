@@ -4,9 +4,12 @@ export type TOrder = {
     userId: Schema.Types.ObjectId;
     cafeId: Schema.Types.ObjectId;
     menus: { cnt: number; menu: Schema.Types.ObjectId };
-    totalPrice: number;
+    amount: number;
     status: string;
     payment: Schema.Types.ObjectId;
+    orderNumber: string;
+    createdAt: Date;
+    updatedAt: Date;
 };
 
 /**
@@ -15,15 +18,18 @@ export type TOrder = {
  * @param userId: Schema.Types.ObjectId;
  * @param cafeId: Schema.Types.ObjectId;
  * @param menus: { cnt: number; menu: Schema.Types.ObjectId};
- * @param totalPrice: number;
+ * @param amount: number;
  * @param status: string;
  * @param payment: Schema.Types.ObjectId;
+ * @param orderNumber: string;
+ * @param createdAt: Date;
+ * @param updatedAt: Date;
  */
 
 export interface IOrder extends TOrder {}
 
 const OrderSchema: Schema = new Schema<IOrder>({
-    totalPrice: { type: Number, default: 0, required: true },
+    amount: { type: Number, default: 0, required: true },
     status: {
         type: String,
         enum: ['basket', 'checking', 'proceeding', 'complete'],
@@ -39,6 +45,9 @@ const OrderSchema: Schema = new Schema<IOrder>({
             cnt: { type: Number },
         },
     ],
+    createdAt: { type: Date, default: Date.now() },
+    updatedAt: { type: Date },
+    orderNumber: { type: String, required: true, unique: true },
 });
 
 const Order = model<IOrder>('order', OrderSchema);
