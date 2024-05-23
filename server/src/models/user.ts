@@ -11,11 +11,12 @@ export type TUser = {
     appPush?: boolean;
     locAgreement?: boolean;
     isOwner?: boolean;
-    freqCafes?: Schema.Types.ObjectId;
-    likedCafes?: Schema.Types.ObjectId;
-    basket?: Schema.Types.ObjectId;
-    orders?: Schema.Types.ObjectId;
-    likedMenus?: Schema.Types.ObjectId;
+    freqCafes?: Schema.Types.ObjectId[];
+    likedCafes?: Schema.Types.ObjectId[];
+    cart?: Schema.Types.ObjectId;
+    orders?: Schema.Types.ObjectId[];
+    likedMenus?: Schema.Types.ObjectId[];
+    notifications: Schema.Types.ObjectId[];
 };
 
 /**
@@ -33,62 +34,35 @@ export type TUser = {
  * @param isOwner?: boolean;
  * @param freqCafes?: Schema.Types.ObjectId;
  * @param likedCafes?: Schema.Types.ObjectId;
- * @param basket?: Schema.Types.ObjectId;
+ * @param cart?: Schema.Types.ObjectId;
  * @param orders?: Schema.Types.ObjectId;
  * @param likedMenus?: Schema.Types.ObjectId;
+ * @param notifications: Schema.Types.ObjectId[];
  */
 
 export interface IUser extends TUser {}
 
 const UserSchema: Schema = new Schema<IUser>({
-    name: {
-        type: String,
-        required: true,
-        unique: true,
-    },
-    nickname: {
-        type: String,
-        required: true,
-    },
-    email: {
-        type: String,
-        unique: true,
-    },
-    password: {
-        type: String,
-        required: true,
-    },
-    phone: {
-        type: String,
-        required: true,
-        unique: true,
-    },
+    name: { type: String, required: true, unique: true },
+    nickname: { type: String, required: true },
+    email: { type: String, unique: true },
+    password: { type: String, required: true },
+    phone: { type: String, required: true, unique: true },
     loginWay: {
         type: String,
-        enum: ['email', 'kakao', 'google', 'apple', 'naver'],
-        default: 'email',
+        enum: ['phone', 'kakao', 'google', 'apple', 'naver'],
+        default: 'phone',
     },
-    marketing: {
-        type: Boolean,
-        default: false,
-    },
-    appPush: {
-        type: Boolean,
-        default: false,
-    },
-    locAgreement: {
-        type: Boolean,
-        default: false,
-    },
-    isOwner: {
-        type: Boolean,
-        default: false,
-    },
+    marketing: { type: Boolean, default: false },
+    appPush: { type: Boolean, default: false },
+    locAgreement: { type: Boolean, default: false },
+    isOwner: { type: Boolean, default: false },
     freqCafes: [{ type: Schema.Types.ObjectId, ref: 'cafe' }],
     likedCafes: [{ type: Schema.Types.ObjectId, ref: 'cafe' }],
-    basket: { type: Schema.Types.ObjectId, ref: 'order' },
+    cart: { type: Schema.Types.ObjectId, ref: 'cart' },
     orders: [{ type: Schema.Types.ObjectId, ref: 'order' }],
     likedMenus: [{ type: Schema.Types.ObjectId, ref: 'menu' }],
+    notifications: [{ type: Schema.Types.ObjectId, ref: 'notification' }],
 });
 
 const User = model<IUser>('user', UserSchema);
