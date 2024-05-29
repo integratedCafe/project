@@ -1,83 +1,85 @@
-import bcrypt from 'bcryptjs';
 import { NextFunction, Request, Response } from 'express';
-import jwt from 'jsonwebtoken';
-import config from '../config/index';
-import User from '../models/user';
-
-const { JWT_SECRET } = config;
-
-interface ILoginReq {
-    password: string;
-    phone: string;
-}
-
-interface IRegisterReq {
-    name: string;
-    email?: string;
-    password: string;
-    phone: string;
-    nickname: string;
-}
-
-interface IUpdateReq {
-    name: string;
-    nickname: string;
-    isMarketing: boolean;
-    isAppPush: boolean;
-    isLocAgreement: boolean;
-}
+import Cafe, { ICafe } from '../models/cafe';
 
 class CafeController {
     static create = async (req: Request, res: Response, next: NextFunction) => {
-        const { phone, password }: ILoginReq = req.body;
+        const {
+            menus,
+            location,
+            name,
+            ownerId,
+            brNumber,
+            phone,
+            brandId,
+            image = '',
+            description = '',
+            breakTime = { start: '00:00', end: '00:00' },
+            openHour = { start: '00:00', end: '00:00' },
+            dayOffWeek = [],
+        }: ICafe = req.body;
 
+        if (!menus)
+            return res
+                .status(400)
+                .json({ success: false, msg: '메뉴는 필수항목입니다.' });
+        if (!location)
+            return res
+                .status(400)
+                .json({ success: false, msg: '위치는 필수항목입니다.' });
+        if (!name)
+            return res
+                .status(400)
+                .json({ success: false, msg: '업장명은 필수항목입니다.' });
+        if (!ownerId)
+            return res
+                .status(400)
+                .json({ success: false, msg: '업장주 ID값은 필수항목입니다.' });
+        if (!brNumber)
+            return res.status(400).json({
+                success: false,
+                msg: '사업자등록번호는 필수항목입니다.',
+            });
         if (!phone)
             return res
                 .status(400)
-                .json({ success: false, msg: '휴대폰 번호를 작성해주세요.' });
-        else if (!password)
+                .json({ success: false, msg: '휴대폰은 필수항목입니다.' });
+        if (!brandId)
             return res
                 .status(400)
-                .json({ success: false, msg: '비밀번호를 작성해주세요.' });
+                .json({ success: false, msg: '브랜드 ID값은 필수항목입니다.' });
 
-        User.findOne({ phone }).then((user) => {
-            if (!user)
-                return res.status(400).json({
-                    success: false,
-                    msg: '휴대폰 번호를 확인해주세요.',
-                });
-
-            bcrypt.compare(password, user.password).then((isMatch) => {
-                if (!isMatch)
-                    return res.status(400).json({
-                        success: false,
-                        msg: '비밀번호를 확인해주세요.',
-                    });
-
-                jwt.sign(
-                    { id: user.id },
-                    JWT_SECRET,
-                    { expiresIn: 36000000 },
-                    (err, token) => {
-                        if (err)
-                            return res
-                                .status(400)
-                                .json({ success: false, msg: err });
-
-                        res.json({
-                            success: true,
-                            token,
-                            user,
-                        });
-                    },
-                );
-            });
+        // Menu 관련 로직부터 돌려야될듯
+        const newCafe = new Cafe({
+            menus,
+            location,
+            name,
+            ownerId,
+            brNumber,
+            phone,
+            brandId,
+            image,
+            description,
+            breakTime,
+            openHour,
+            dayOffWeek,
         });
+
+        newCafe
+            .save()
+            .then((newcafe) => {
+                res.status(200).json({ success: true, cafe: newcafe });
+            })
+            .catch(() => {
+                res.status(400).json({
+                    success: false,
+                    msg: '카페를 저장하지 못했습니다.',
+                });
+            });
     };
 
     static delete = async (req: Request, res: Response) => {
         try {
-            await User.deleteOne({ _id: req.params.id });
+            await Cafe.deleteOne({ _id: req.params.id });
 
             return res.status(200).json({ success: true });
         } catch (e) {
@@ -88,32 +90,71 @@ class CafeController {
 
     static update = async (req: Request, res: Response) => {
         const {
+            menus,
+            location,
             name,
-            nickname,
-            isMarketing,
-            isAppPush,
-            isLocAgreement,
-        }: IUpdateReq = req.body;
+            ownerId,
+            brNumber,
+            phone,
+            brandId,
+            image,
+            description,
+            breakTime,
+            openHour,
+            dayOffWeek,
+        }: ICafe = req.body;
 
-        User.findById(req.params.id).then((user) => {
-            if (!user)
+        // Menu 관련 로직부터 해야될듯
+        if (!menus)
+            return res
+                .status(400)
+                .json({ success: false, msg: '메뉴는 필수항목입니다.' });
+        if (!location)
+            return res
+                .status(400)
+                .json({ success: false, msg: '위치는 필수항목입니다.' });
+        if (!name)
+            return res
+                .status(400)
+                .json({ success: false, msg: '업장명은 필수항목입니다.' });
+        if (!ownerId)
+            return res
+                .status(400)
+                .json({ success: false, msg: '업장주 ID값은 필수항목입니다.' });
+        if (!brNumber)
+            return res.status(400).json({
+                success: false,
+                msg: '사업자등록번호는 필수항목입니다.',
+            });
+        if (!phone)
+            return res
+                .status(400)
+                .json({ success: false, msg: '휴대폰은 필수항목입니다.' });
+        if (!brandId)
+            return res
+                .status(400)
+                .json({ success: false, msg: '브랜드 ID값은 필수항목입니다.' });
+
+        Cafe.findById(req.params.id).then((cafe) => {
+            if (!cafe)
                 return res
                     .status(400)
-                    .json({ success: false, msg: '유저를 찾을 수 없습니다.' });
+                    .json({ success: false, msg: '카페를 찾을 수 없습니다.' });
 
-            User.findByIdAndUpdate(req.params.id, {
+            Cafe.findByIdAndUpdate(req.params.id, {
+                menus,
+                location,
                 name,
-                nickname,
-                isMarketing,
-                isAppPush,
-                isLocAgreement,
-            })
-                .then((user) => {
-                    res.json({ success: true, user });
-                })
-                .catch((err) => {
-                    res.status(400).json({ success: false, msg: err.msg });
-                });
+                ownerId,
+                brNumber,
+                phone,
+                brandId,
+                image,
+                description,
+                breakTime,
+                openHour,
+                dayOffWeek,
+            });
         });
     };
 }
