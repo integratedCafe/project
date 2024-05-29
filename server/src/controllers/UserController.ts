@@ -41,6 +41,7 @@ class UserController {
                 .json({ success: false, msg: '비밀번호를 작성해주세요.' });
 
         User.findOne({ phone }).then((user) => {
+            console.log('User >>>> ', user);
             if (!user)
                 return res.status(400).json({
                     success: false,
