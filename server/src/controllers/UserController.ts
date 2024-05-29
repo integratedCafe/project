@@ -2,6 +2,7 @@ import bcrypt from 'bcryptjs';
 import { NextFunction, Request, Response } from 'express';
 import jwt from 'jsonwebtoken';
 import config from '../config/index';
+import { CustomRequest } from '../middleware/checkUser';
 import User from '../models/user';
 
 const { JWT_SECRET } = config;
@@ -165,10 +166,9 @@ class UserController {
 
     static auth = async (req: Request, res: Response, next: NextFunction) => {
         try {
-            console.log('user:::', res.locals.jwtPayload);
-            const user = await User.findById(res.locals.user._id).select(
-                '-password',
-            );
+            let id = (req as CustomRequest).token.payload.id;
+
+            const user = await User.findById(id).select('-password');
 
             if (!user) {
                 return res
