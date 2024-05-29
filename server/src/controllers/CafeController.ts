@@ -27,8 +27,8 @@ interface IUpdateReq {
     isLocAgreement: boolean;
 }
 
-class UserController {
-    static login = async (req: Request, res: Response, next: NextFunction) => {
+class CafeController {
+    static create = async (req: Request, res: Response, next: NextFunction) => {
         const { phone, password }: ILoginReq = req.body;
 
         if (!phone)
@@ -75,52 +75,7 @@ class UserController {
         });
     };
 
-    static register = async (req: Request, res: Response) => {
-        const { name, email, password, phone, nickname }: IRegisterReq =
-            req.body;
-
-        User.findOne({ phone }).then((user) => {
-            if (user)
-                return res.status(400).json({
-                    success: false,
-                    msg: '이미 존재하는 휴대폰 번호입니다.',
-                });
-
-            const newUser = new User({
-                name: name,
-                email: email,
-                password: password,
-                phone: phone,
-                nickname: nickname,
-            });
-
-            bcrypt.genSalt(10, (err, salt) => {
-                bcrypt.hash(newUser.password, salt, (err, hash) => {
-                    if (err) return res.status(400).json({ err });
-
-                    newUser.password = hash;
-                    newUser.save().then((user) => {
-                        jwt.sign(
-                            { id: user.id },
-                            JWT_SECRET,
-                            { expiresIn: 36000000 },
-                            (err, token) => {
-                                if (err) return res.status(400).json({ err });
-
-                                res.json({
-                                    success: true,
-                                    token,
-                                    user,
-                                });
-                            },
-                        );
-                    });
-                });
-            });
-        });
-    };
-
-    static withdrawal = async (req: Request, res: Response) => {
+    static delete = async (req: Request, res: Response) => {
         try {
             await User.deleteOne({ _id: req.params.id });
 
@@ -161,28 +116,6 @@ class UserController {
                 });
         });
     };
-
-    static auth = async (req: Request, res: Response, next: NextFunction) => {
-        try {
-            console.log('user:::', res.locals.jwtPayload);
-            const user = await User.findById(res.locals.user._id).select(
-                '-password',
-            );
-
-            if (!user) {
-                return res
-                    .status(400)
-                    .json({ msg: '유저가 존재하지 않습니다.' });
-            }
-
-            res.json({ success: true, user });
-        } catch (e) {
-            res.status(400).json({
-                success: false,
-                msg: '유저를 찾을 수 없습니다.',
-            });
-        }
-    };
 }
 
-export default UserController;
+export default CafeController;
