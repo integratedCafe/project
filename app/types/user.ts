@@ -7,6 +7,11 @@ interface UserType {
     appPush: boolean;
     locAgreement: boolean;
     isOwner: boolean;
+    freqCafes: string[];
+    likedCafes: string[];
+    orders: string[];
+    likedMenus: string[];
+    notifications: string[];
 }
 
 interface LoginType {

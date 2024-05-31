@@ -1,6 +1,6 @@
 import { View } from 'react-native';
 import { useState } from 'react';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useRecoilState } from 'recoil';
 
 // Component
@@ -19,8 +19,17 @@ import { service } from '@/utils/service';
 
 // API
 import userApi from '@/api/userApi';
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { RootStackParams } from '@/types/router';
 
-const LoginInput: React.FunctionComponent = () => {
+type routerProps = NativeStackScreenProps<
+    RootStackParams,
+    'LoginInput' | 'Login' | 'Home'
+>;
+
+const LoginInput = ({ navigation }: routerProps) => {
+    const queryClient = useQueryClient();
+
     const [user, setUser] = useRecoilState(userState);
     const [state, setState] = useState<LoginType>(initLoginState);
 
@@ -30,11 +39,12 @@ const LoginInput: React.FunctionComponent = () => {
             console.error('Login API Error >>>> ', Error);
         },
         onSuccess: (data, variables, context) => {
-            console.log('Login Suceess >>>> ', data, variables, context);
+            console.log('Login Suceess >>>> ', data);
             if (data.success) {
                 console.log('Success???');
                 setUser({ ...data.user, token: data.token });
                 service.setItem('user', data.token);
+                queryClient.invalidateQueries({ queryKey: ['user'] });
             }
         },
     });
@@ -60,7 +70,7 @@ const LoginInput: React.FunctionComponent = () => {
                 }
             />
             <CommonButton title="Login" onPress={onLogin}></CommonButton>
-            <Link url="Register" internal>
+            <Link url="SignUp" internal>
                 계정이 없으신가요?
             </Link>
         </Container>

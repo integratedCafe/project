@@ -1,5 +1,6 @@
 import { SignUpType, LoginType, UserType } from '@/types/user';
 import { Apis } from '@/utils/api';
+import { service } from '@/utils/service';
 import { QueryFunction, QueryFunctionContext } from '@tanstack/react-query';
 
 const userApi = {
@@ -10,9 +11,32 @@ const userApi = {
         return await Apis.post('/user/signup', params);
     },
     getUser: async ({ queryKey }: QueryFunctionContext) => {
-        const [_, userId] = queryKey; // 실제로 필요한 queryKey를 사용하세요.
-        const response = await Apis.get(`/user/${userId}`);
-        return response.data as UserType; // 여기서 UserType으로 타입 캐스팅
+        try {
+            const token = await service.getItem('user');
+
+            if (token) {
+                const config = {
+                    headers: {
+                        Authorization: `${token}`,
+                    },
+                };
+                const res = await Apis.get(`/user`, config);
+
+                if (!res.success) {
+                    if (Object.hasOwn(res, 'success')) {
+                        throw new Error('Get User API Error >>>> ');
+                    } else {
+                        console.log('User Token Not Exist');
+                    }
+                }
+
+                return res.user as UserType;
+            } else {
+                return null;
+            }
+        } catch (err) {
+            throw err;
+        }
     },
 };
 

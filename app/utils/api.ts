@@ -1,8 +1,15 @@
 import axios from 'axios';
-import { SERVER_API_URL } from '@env';
+import { WEB_SERVER_API_URL, IOS_SERVER_API_URL } from '@env';
+import { Platform } from 'react-native';
+
+const apiUrl = () => {
+    console.log(IOS_SERVER_API_URL, ' : IOS_SERVER_API_URL');
+    if (Platform.OS == 'ios') return IOS_SERVER_API_URL;
+    else return WEB_SERVER_API_URL;
+};
 
 const api = axios.create({
-    baseURL: `${SERVER_API_URL}`,
+    baseURL: `${apiUrl()}`,
     headers: {
         'Content-Type': 'application/json; charset=UTF-8',
         accept: 'application/json',

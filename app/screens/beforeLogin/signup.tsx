@@ -5,12 +5,14 @@ import {
     NativeSyntheticEvent,
     TextInputChangeEventData,
 } from 'react-native';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useRecoilState } from 'recoil';
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
 
 // Type, State
 import { SignUpType } from '@/types/user';
 import { userState } from '@/states/user';
+import { RootStackParams } from '@/types/router';
 
 // Util
 import { service } from '@/utils/service';
@@ -24,7 +26,11 @@ import CommonButton from '@/components/commonButton';
 import CommonInput from '@/components/commonInput';
 import { Container } from '@/ui/commonUi';
 
-const SignUp: React.FC = () => {
+type routerProps = NativeStackScreenProps<RootStackParams, 'Home' | 'SignUp'>;
+
+const SignUp: React.FC<routerProps> = ({ navigation }) => {
+    const queryClient = useQueryClient();
+
     const [user, setUser] = useRecoilState(userState);
 
     const [state, setState] = useState<SignUpType>(initSignUpState);
@@ -46,6 +52,7 @@ const SignUp: React.FC = () => {
             if (data.success) {
                 setUser({ ...data.user, token: data.token });
                 service.setItem('user', data.token);
+                queryClient.invalidateQueries({ queryKey: ['user'] });
             }
         },
     });
@@ -93,6 +100,7 @@ const SignUp: React.FC = () => {
                 label="비밀번호"
                 value={state.password}
                 error={errField.password}
+                isPassword
                 onChange={(e) => handleChange('password', e)}
             />
             <CommonInput

@@ -5,7 +5,8 @@ interface IUserState extends UserType {
     token: string;
 }
 
-export const userState = atom<IUserState>({
+// export const userState = atom<IUserState>({
+export const userState = atom<UserType>({
     key: 'userState',
     default: {
         _id: '',
@@ -16,6 +17,11 @@ export const userState = atom<IUserState>({
         appPush: false,
         locAgreement: false,
         isOwner: false,
-        token: '',
+        freqCafes: [],
+        likedCafes: [],
+        orders: [],
+        likedMenus: [],
+        notifications: [],
+        // token: '',
     },
 });

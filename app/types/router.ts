@@ -2,7 +2,7 @@ type RootStackParams = {
     Home: undefined;
     Login: undefined;
     LoginInput: undefined;
-    Register: undefined;
+    SignUp: undefined;
 };
 
 export { RootStackParams };
