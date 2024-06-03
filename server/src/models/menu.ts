@@ -45,7 +45,7 @@ const MenuSchema: Schema = new Schema<IMenu>({
         },
     ],
     createdAt: { type: Date, default: Date.now() },
-    updatedAt: { type: Date },
+    updatedAt: { type: Date, default: Date.now() },
     description: { type: String },
 });
 

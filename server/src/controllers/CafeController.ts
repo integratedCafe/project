@@ -128,6 +128,8 @@ class CafeController {
                     .status(400)
                     .json({ success: false, msg: '카페를 찾을 수 없습니다.' });
 
+            let updatedAt = Date.now();
+
             Cafe.findByIdAndUpdate(req.params.id, {
                 location,
                 name,
@@ -140,6 +142,7 @@ class CafeController {
                 breakTime,
                 openHour,
                 dayOffWeek,
+                updatedAt,
             });
         });
     };
