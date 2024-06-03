@@ -17,6 +17,7 @@ export type TUser = {
     orders?: Schema.Types.ObjectId[];
     likedMenus?: Schema.Types.ObjectId[];
     notifications: Schema.Types.ObjectId[];
+    brNumber?: string;
 };
 
 /**
@@ -38,6 +39,7 @@ export type TUser = {
  * @param orders?: Schema.Types.ObjectId;
  * @param likedMenus?: Schema.Types.ObjectId;
  * @param notifications: Schema.Types.ObjectId[];
+ * @param brNumber?: string;
  */
 
 export interface IUser extends TUser {}
@@ -63,6 +65,7 @@ const UserSchema: Schema = new Schema<IUser>({
     orders: [{ type: Schema.Types.ObjectId, ref: 'order' }],
     likedMenus: [{ type: Schema.Types.ObjectId, ref: 'menu' }],
     notifications: [{ type: Schema.Types.ObjectId, ref: 'notification' }],
+    brNumber: { type: String },
 });
 
 const User = model<IUser>('user', UserSchema);
