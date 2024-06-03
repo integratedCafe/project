@@ -1,10 +1,9 @@
-import { NextFunction, Request, Response } from 'express';
+import { Request, Response } from 'express';
 import Cafe, { ICafe } from '../models/cafe';
 
 class CafeController {
-    static create = async (req: Request, res: Response, next: NextFunction) => {
+    static create = async (req: Request, res: Response) => {
         const {
-            menus,
             location,
             name,
             ownerId,
@@ -18,10 +17,6 @@ class CafeController {
             dayOffWeek = [],
         }: ICafe = req.body;
 
-        if (!menus)
-            return res
-                .status(400)
-                .json({ success: false, msg: '메뉴는 필수항목입니다.' });
         if (!location)
             return res
                 .status(400)
@@ -48,9 +43,7 @@ class CafeController {
                 .status(400)
                 .json({ success: false, msg: '브랜드 ID값은 필수항목입니다.' });
 
-        // Menu 관련 로직부터 돌려야될듯
         const newCafe = new Cafe({
-            menus,
             location,
             name,
             ownerId,
@@ -90,7 +83,6 @@ class CafeController {
 
     static update = async (req: Request, res: Response) => {
         const {
-            menus,
             location,
             name,
             ownerId,
@@ -104,11 +96,6 @@ class CafeController {
             dayOffWeek,
         }: ICafe = req.body;
 
-        // Menu 관련 로직부터 해야될듯
-        if (!menus)
-            return res
-                .status(400)
-                .json({ success: false, msg: '메뉴는 필수항목입니다.' });
         if (!location)
             return res
                 .status(400)
@@ -142,7 +129,6 @@ class CafeController {
                     .json({ success: false, msg: '카페를 찾을 수 없습니다.' });
 
             Cafe.findByIdAndUpdate(req.params.id, {
-                menus,
                 location,
                 name,
                 ownerId,
