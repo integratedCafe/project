@@ -6,12 +6,19 @@ import { useEffect } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
-// Screen
+// Screen - Common
+import Loading from '@/screens/loading';
+// Screen - Before Login
 import Login from '@/screens/beforeLogin/login';
 import LoginInput from '@/screens/beforeLogin/loginInput';
 import SignUp from '@/screens/beforeLogin/signup';
-import Home from '@/screens/afterLogin/Home';
-import Loading from '@/screens/loading';
+
+// Screen - After Login (User)
+import Home from '@/screens/afterLogin/user/Home';
+
+// Screen - After Login (Admin)
+import AdminHome from '@/screens/afterLogin/admin/Home';
+import CafeRegister from '@/screens/afterLogin/admin/CafeReg';
 
 // Type, State
 import { RootStackParams } from '@/types/router';
@@ -50,14 +57,32 @@ const AppNavigator = () => {
     return (
         <NavigationContainer>
             {user ? (
-                <RootStack.Navigator initialRouteName="Home">
-                    <RootStack.Screen
-                        name="Home"
-                        component={Home}
-                        options={{ title: 'ICafe' }}
-                    />
-                </RootStack.Navigator>
+                user.isOwner ? (
+                    // Admin
+                    <RootStack.Navigator initialRouteName="AdminHome">
+                        <RootStack.Screen
+                            name="AdminHome"
+                            component={AdminHome}
+                            options={{ title: 'Admin Home' }}
+                        />
+                        <RootStack.Screen
+                            name="CafeRegister"
+                            component={CafeRegister}
+                            options={{ title: '카페 등록' }}
+                        />
+                    </RootStack.Navigator>
+                ) : (
+                    // User
+                    <RootStack.Navigator initialRouteName="Home">
+                        <RootStack.Screen
+                            name="Home"
+                            component={Home}
+                            options={{ title: 'ICafe' }}
+                        />
+                    </RootStack.Navigator>
+                )
             ) : (
+                // Guest
                 <RootStack.Navigator initialRouteName="Login">
                     <RootStack.Screen
                         name="Login"

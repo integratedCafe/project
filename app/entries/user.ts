@@ -1,6 +1,6 @@
-import { LoginWay, SignUpType, loginType } from '@/types/user';
+import { LoginWay, SignUpType, LoginType } from '@/types/user';
 
-const initLoginState: loginType = {
+const initLoginState: LoginType = {
     phone: '',
     password: '',
 };

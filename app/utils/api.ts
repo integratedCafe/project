@@ -4,7 +4,8 @@ import { Platform } from 'react-native';
 
 const apiUrl = () => {
     console.log(IOS_SERVER_API_URL, ' : IOS_SERVER_API_URL');
-    if (Platform.OS == 'ios') return IOS_SERVER_API_URL;
+    if (Platform.OS == 'ios' || Platform.OS == 'android')
+        return IOS_SERVER_API_URL;
     else return WEB_SERVER_API_URL;
 };
 

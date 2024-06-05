@@ -8,6 +8,18 @@ const userApi = {
         return await Apis.post('/user/login', params);
     },
     signup: async (params: SignUpType) => {
+        params = {
+            ...params,
+            name: 'OwnerTest',
+            phone: '1234',
+            password: '1234',
+            email: 'OwnerTest',
+            nickname: 'OwnerTest',
+            marketing: true,
+            appPush: true,
+            locAgreement: true,
+            // isOwner: true,
+        };
         return await Apis.post('/user/signup', params);
     },
     getUser: async ({ queryKey }: QueryFunctionContext) => {

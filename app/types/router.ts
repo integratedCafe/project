@@ -3,6 +3,8 @@ type RootStackParams = {
     Login: undefined;
     LoginInput: undefined;
     SignUp: undefined;
+    AdminHome: undefined;
+    CafeRegister: undefined;
 };
 
 export { RootStackParams };
