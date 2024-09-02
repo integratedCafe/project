@@ -13,15 +13,13 @@ interface ILoginReq {
 }
 
 interface IRegisterReq {
-    name: string;
     email?: string;
     password: string;
     phone: string;
-    nickname: string;
+    nickname?: string;
 }
 
 interface IUpdateReq {
-    name: string;
     nickname: string;
     isMarketing: boolean;
     isAppPush: boolean;
@@ -78,7 +76,7 @@ class UserController {
     };
 
     static register = async (req: Request, res: Response) => {
-        const { name, email, password, phone, nickname }: IRegisterReq =
+        const { email, password, phone, nickname }: IRegisterReq =
             req.body;
 
         User.findOne({ phone }).then((user) => {
@@ -89,11 +87,10 @@ class UserController {
                 });
 
             const newUser = new User({
-                name: name,
-                email: email,
-                password: password,
-                phone: phone,
-                nickname: nickname,
+                email,
+                password,
+                phone,
+                nickname,
             });
 
             bcrypt.genSalt(10, (err, salt) => {
@@ -135,7 +132,6 @@ class UserController {
 
     static update = async (req: Request, res: Response) => {
         const {
-            name,
             nickname,
             isMarketing,
             isAppPush,
@@ -149,7 +145,6 @@ class UserController {
                     .json({ success: false, msg: '유저를 찾을 수 없습니다.' });
 
             User.findByIdAndUpdate(req.params.id, {
-                name,
                 nickname,
                 isMarketing,
                 isAppPush,
