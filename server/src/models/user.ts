@@ -1,8 +1,7 @@
 import { Schema, model } from 'mongoose';
 
 export type TUser = {
-    name: string;
-    nickname: string;
+    nickname?: string;
     email?: string;
     password: string;
     phone: string;
@@ -23,8 +22,7 @@ export type TUser = {
 /**
  *
  * TUser
- * @param name: string;
- * @param nickname: string;
+ * @param nickname?: string;
  * @param email?: string;
  * @param password: string;
  * @param phone: string;
@@ -45,8 +43,7 @@ export type TUser = {
 export interface IUser extends TUser {}
 
 const UserSchema: Schema = new Schema<IUser>({
-    name: { type: String, required: true, unique: true },
-    nickname: { type: String, required: true },
+    nickname: { type: String },
     email: { type: String, unique: true },
     password: { type: String, required: true },
     phone: { type: String, required: true, unique: true },
