@@ -87,12 +87,14 @@ class _HomeScreenState extends State<HomeScreen> {
   void initState() {
     super.initState();
     // 데이터를 초기화하는 메소드 호출
+    print("Init State!");
     _testLogin();
   }
 
   Future<void> _testLogin() async {
-    dynamic res = await ApiService().post(
-        '/login', {'phone': 'dbswpgur2@naver.com', 'password': 'dbswpgur12!'});
+    print('Init Test Login');
+    dynamic res = await ApiService()
+        .post('/user/login', {'phone': '01027977760', 'password': 'password'});
 
     print('Login Response >>>> $res');
   }
@@ -219,10 +221,12 @@ class _HomeScreenState extends State<HomeScreen> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text('윤제혁',
-                        style: TextStyle(
-                            fontSize: 18, fontWeight: FontWeight.w700)),
-                    Text('1000 P', style: TextStyle(fontSize: 16)),
+                    Text(
+                      '윤제혁',
+                      style:
+                          TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+                    ),
+                    Text('내 포인트 1000 점', style: TextStyle(fontSize: 16)),
                   ],
                 ),
               ),

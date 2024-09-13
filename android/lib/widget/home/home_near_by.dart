@@ -31,12 +31,27 @@ class _HomeNearBy extends State<HomeNearBy> {
         child: Padding(
           padding: const EdgeInsets.all(16.0),
           child: Column(
-            children: widget.nearByList.map((nearByItem) {
-              return Padding(
-                padding: const EdgeInsets.only(bottom: 16.0),
-                child: nearByListItem(nearByItem),
-              );
-            }).toList(),
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                '내 위치에 가까운 매장이예요',
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 20,
+                ),
+              ),
+              const SizedBox(
+                height: 12.0,
+              ),
+              Column(
+                children: widget.nearByList.map((nearByItem) {
+                  return Padding(
+                    padding: const EdgeInsets.only(bottom: 8.0),
+                    child: nearByListItem(nearByItem),
+                  );
+                }).toList(),
+              ),
+            ],
           ),
         ),
       ),
@@ -46,25 +61,23 @@ class _HomeNearBy extends State<HomeNearBy> {
   Widget nearByListItem(Map<String, String> data) {
     return Row(
       children: [
-        // Expanded로 감싸서 Row 안에서 AspectRatio가 크기를 받도록 함
         Expanded(
-          flex: 2, // 이미지가 차지할 비율 설정
+          flex: 3,
           child: Padding(
             padding: const EdgeInsets.all(8.0),
             child: AspectRatio(
-              aspectRatio: 16 / 9, // 원하는 비율 설정 (16:9)
+              aspectRatio: 16 / 9,
               child: Image.asset(
                 data['image']!,
-                fit: BoxFit.cover, // 비율에 맞게 이미지를 자르거나 축소
+                fit: BoxFit.cover,
                 width: double.infinity,
               ),
             ),
           ),
         ),
-        const SizedBox(width: 12),
-        // 텍스트 영역도 확장 가능하게 설정
+        const SizedBox(width: 8),
         Expanded(
-          flex: 3, // 텍스트가 차지할 비율 설정
+          flex: 3,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [

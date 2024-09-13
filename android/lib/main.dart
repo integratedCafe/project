@@ -11,8 +11,13 @@ import 'package:intergrate_cafe/screen/home_screen.dart';
 // import Uitl
 import 'package:intergrate_cafe/util/color.dart';
 
-void main() async {
-  await dotenv.load();
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  print('Main Init!!');
+  await dotenv.load(fileName: ".env");
+  // dotenv.testLoad({'BASE_URL': 'localhost:8080'});
+  print(dotenv.env['BASE_URL']); // 환경 변수가 제대로 로드되었는지 확인
+
   runApp(const MyApp());
 }
 

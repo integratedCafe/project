@@ -21,6 +21,7 @@ class ApiService {
 
   Future<dynamic> post(String endpoint, Map<String, dynamic> data) async {
     final url = Uri.parse('$baseUrl$endpoint');
+    print('Post Argument Data >>>> $data');
     try {
       final response = await http.post(
         url,
@@ -30,7 +31,7 @@ class ApiService {
       if (response.statusCode == 201) {
         return json.decode(response.body);
       } else {
-        throw Exception('Failed to post data: ${response.statusCode}');
+        throw Exception('Failed to post data: ${response.body}');
       }
     } catch (e) {
       throw Exception('Failed to post data: $e');
