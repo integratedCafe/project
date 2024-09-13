@@ -1,1 +1,12 @@
 init
+
+- Brand Color
+#D9DAFC - 1 -- (readonly color)
+#B3B6F9 - 2 -- (disabled color)
+#8A8DED - 3
+#696DDC - 4 -- (main color)
+#3C40C6 - 5 -- (focus active color)
+#2B2FAA - 6
+#1E208E - 7
+#131572 - 8
+#0B0C5F - 9
