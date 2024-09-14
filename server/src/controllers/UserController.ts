@@ -4,11 +4,21 @@ import jwt from "jsonwebtoken";
 import config from "../config/index";
 import { CustomRequest } from "../middleware/checkUser";
 import User from "../models/user";
+import nodemailer from "nodemailer";
+
 const { coolsms } = require("coolsms-node-sdk");
 
 // import * as PortOne from "@portone/browser-sdk/v2";
 
-const { JWT_SECRET, COOLSMS_APIKEY, COOLSMS_APIKEY_SECRET, STORE_ID, CHANNEL_KEY } = config;
+const {
+    JWT_SECRET,
+    COOLSMS_APIKEY,
+    COOLSMS_APIKEY_SECRET,
+    STORE_ID,
+    CHANNEL_KEY,
+    NODEMAILER_USER,
+    NODEMAILER_PASS,
+} = config;
 
 interface ILoginReq {
     password: string;
@@ -35,7 +45,9 @@ class UserController {
             const user = await User.findById(id).select("-password");
 
             if (!user) {
-                return res.status(400).json({ msg: "유저가 존재하지 않습니다." });
+                return res
+                    .status(400)
+                    .json({ msg: "유저가 존재하지 않습니다." });
             }
 
             res.json({ success: true, user });
@@ -50,8 +62,14 @@ class UserController {
     static login = async (req: Request, res: Response, next: NextFunction) => {
         const { phone, password }: ILoginReq = req.body;
 
-        if (!phone) return res.status(400).json({ success: false, msg: "휴대폰 번호를 작성해주세요." });
-        else if (!password) return res.status(400).json({ success: false, msg: "비밀번호를 작성해주세요." });
+        if (!phone)
+            return res
+                .status(400)
+                .json({ success: false, msg: "휴대폰 번호를 작성해주세요." });
+        else if (!password)
+            return res
+                .status(400)
+                .json({ success: false, msg: "비밀번호를 작성해주세요." });
 
         User.findOne({ phone }).then((user) => {
             if (!user)
@@ -68,15 +86,23 @@ class UserController {
                         msg: "휴대폰 번호 또는 비밀번호를 확인해주세요.",
                     });
 
-                jwt.sign({ id: user.id }, JWT_SECRET, { expiresIn: 36000000 }, (err, token) => {
-                    if (err) return res.status(400).json({ success: false, msg: err });
+                jwt.sign(
+                    { id: user.id },
+                    JWT_SECRET,
+                    { expiresIn: 36000000 },
+                    (err, token) => {
+                        if (err)
+                            return res
+                                .status(400)
+                                .json({ success: false, msg: err });
 
-                    res.json({
-                        success: true,
-                        token,
-                        user,
-                    });
-                });
+                        res.json({
+                            success: true,
+                            token,
+                            user,
+                        });
+                    }
+                );
             });
         });
     };
@@ -104,15 +130,20 @@ class UserController {
 
                     newUser.password = hash;
                     newUser.save().then((user) => {
-                        jwt.sign({ id: user.id }, JWT_SECRET, { expiresIn: 36000000 }, (err, token) => {
-                            if (err) return res.status(400).json({ err });
+                        jwt.sign(
+                            { id: user.id },
+                            JWT_SECRET,
+                            { expiresIn: 36000000 },
+                            (err, token) => {
+                                if (err) return res.status(400).json({ err });
 
-                            res.json({
-                                success: true,
-                                token,
-                                user,
-                            });
-                        });
+                                res.json({
+                                    success: true,
+                                    token,
+                                    user,
+                                });
+                            }
+                        );
                     });
                 });
             });
@@ -148,7 +179,8 @@ class UserController {
             .catch((err) => {
                 let errMsg = err.message;
 
-                if (err.name === "CastError") errMsg = "유저를 찾을 수 없습니다.";
+                if (err.name === "CastError")
+                    errMsg = "유저를 찾을 수 없습니다.";
 
                 res.status(400).json({ success: false, msg: errMsg });
             });
@@ -192,7 +224,8 @@ class UserController {
             .catch((err) => {
                 let errMsg = err.message;
 
-                if (err.name === "CastError") errMsg = "유저를 찾을 수 없습니다.";
+                if (err.name === "CastError")
+                    errMsg = "유저를 찾을 수 없습니다.";
 
                 res.status(400).json({ success: false, msg: errMsg });
             });
@@ -207,7 +240,8 @@ class UserController {
                 .catch((err) => {
                     let errMsg = err.message;
 
-                    if (err.name === "CastError") errMsg = "ID 값을 확인해주세요.";
+                    if (err.name === "CastError")
+                        errMsg = "ID 값을 확인해주세요.";
 
                     res.status(400).json({ success: false, msg: errMsg });
                 });
@@ -256,9 +290,60 @@ class UserController {
             text: `인증번호 [${authNum}]를 입력해주세요.`,
         });
 
-        if (result.statusCode === "2000") return res.status(200).json({ success: true, msg: authNum });
+        if (result.statusCode === "2000")
+            return res.status(200).json({ success: true, msg: authNum });
 
-        return res.status(400).json({ success: false, msg: "인증 문자 전송 실패" });
+        return res
+            .status(400)
+            .json({ success: false, msg: "인증 문자 전송 실패" });
+    };
+
+    static authEmail = async (req: Request, res: Response) => {
+        const { email } = req.body;
+
+        User.findOne({ email }).then(async (user) => {
+            if (!user)
+                return res.status(400).json({
+                    success: false,
+                    msg: "등록되지 않은 이메일입니다.",
+                });
+
+            let authNum = "";
+            for (let i = 0; i < 6; i++) {
+                authNum += Math.floor(Math.random() * 10);
+            }
+
+            let transporter = nodemailer.createTransport({
+                service: "gmail",
+                host: "smtp.gmlail.com",
+                port: 587,
+                secure: false,
+                auth: {
+                    user: NODEMAILER_USER,
+                    pass: NODEMAILER_PASS,
+                },
+            });
+
+            let mailOptions = {
+                from: NODEMAILER_USER,
+                to: email,
+                subject: "[카페통합] 비밀번호 찾기 인증번호",
+                html: `<div>비밀번호 찾기를 위해 아래 인증번호를 입력해주세요.</div><br/><div>[${authNum}]</div>`,
+            };
+
+            transporter.sendMail(mailOptions, function (error, info) {
+                if (error) {
+                    console.log("emailError:::", error);
+                    return res.status(400).json({
+                        success: false,
+                        msg: "인증번호를 보내는데 실패했습니다.",
+                    });
+                }
+
+                res.send({ success: true, msg: authNum });
+                transporter.close();
+            });
+        });
     };
 }
 
