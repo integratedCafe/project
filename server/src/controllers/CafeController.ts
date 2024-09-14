@@ -1,7 +1,27 @@
-import { Request, Response } from 'express';
-import Cafe, { ICafe } from '../models/cafe';
+import { Request, Response } from "express";
+import Cafe, { ICafe } from "../models/cafe";
 
 class CafeController {
+    static getCafes = async (req: Request, res: Response) => {
+        try {
+            let page = (Number(req.params.page) - 1) * 20;
+
+            const cafeCount = await Cafe.countDocuments();
+            const cafeFindResult = await Cafe.find()
+                .skip(page)
+                .limit(20)
+                .sort({ date: -1 });
+
+            res.status(200).json({
+                success: true,
+                total: cafeCount,
+                cafes: cafeFindResult,
+            });
+        } catch (err) {
+            res.status(400).json({ success: false, msg: err });
+        }
+    };
+
     static create = async (req: Request, res: Response) => {
         const {
             location,
@@ -9,39 +29,35 @@ class CafeController {
             ownerId,
             brNumber,
             phone,
-            brandId,
-            image = '',
-            description = '',
-            breakTime = { start: '00:00', end: '00:00' },
-            openHour = { start: '00:00', end: '00:00' },
+            brandId = "",
+            image = "",
+            description = "",
+            breakTime = { start: "00:00", end: "00:00" },
+            openHour = { start: "00:00", end: "00:00" },
             dayOffWeek = [],
         }: ICafe = req.body;
 
         if (!location)
             return res
                 .status(400)
-                .json({ success: false, msg: '위치는 필수항목입니다.' });
+                .json({ success: false, msg: "위치는 필수항목입니다." });
         if (!name)
             return res
                 .status(400)
-                .json({ success: false, msg: '업장명은 필수항목입니다.' });
+                .json({ success: false, msg: "업장명은 필수항목입니다." });
         if (!ownerId)
             return res
                 .status(400)
-                .json({ success: false, msg: '업장주 ID값은 필수항목입니다.' });
+                .json({ success: false, msg: "업장주 ID값은 필수항목입니다." });
         if (!brNumber)
             return res.status(400).json({
                 success: false,
-                msg: '사업자등록번호는 필수항목입니다.',
+                msg: "사업자등록번호는 필수항목입니다.",
             });
         if (!phone)
             return res
                 .status(400)
-                .json({ success: false, msg: '휴대폰은 필수항목입니다.' });
-        if (!brandId)
-            return res
-                .status(400)
-                .json({ success: false, msg: '브랜드 ID값은 필수항목입니다.' });
+                .json({ success: false, msg: "휴대폰은 필수항목입니다." });
 
         const newCafe = new Cafe({
             location,
@@ -65,7 +81,7 @@ class CafeController {
             .catch(() => {
                 res.status(400).json({
                     success: false,
-                    msg: '카페를 저장하지 못했습니다.',
+                    msg: "카페를 저장하지 못했습니다.",
                 });
             });
     };
@@ -99,34 +115,34 @@ class CafeController {
         if (!location)
             return res
                 .status(400)
-                .json({ success: false, msg: '위치는 필수항목입니다.' });
+                .json({ success: false, msg: "위치는 필수항목입니다." });
         if (!name)
             return res
                 .status(400)
-                .json({ success: false, msg: '업장명은 필수항목입니다.' });
+                .json({ success: false, msg: "업장명은 필수항목입니다." });
         if (!ownerId)
             return res
                 .status(400)
-                .json({ success: false, msg: '업장주 ID값은 필수항목입니다.' });
+                .json({ success: false, msg: "업장주 ID값은 필수항목입니다." });
         if (!brNumber)
             return res.status(400).json({
                 success: false,
-                msg: '사업자등록번호는 필수항목입니다.',
+                msg: "사업자등록번호는 필수항목입니다.",
             });
         if (!phone)
             return res
                 .status(400)
-                .json({ success: false, msg: '휴대폰은 필수항목입니다.' });
+                .json({ success: false, msg: "휴대폰은 필수항목입니다." });
         if (!brandId)
             return res
                 .status(400)
-                .json({ success: false, msg: '브랜드 ID값은 필수항목입니다.' });
+                .json({ success: false, msg: "브랜드 ID값은 필수항목입니다." });
 
         Cafe.findById(req.params.id).then((cafe) => {
             if (!cafe)
                 return res
                     .status(400)
-                    .json({ success: false, msg: '카페를 찾을 수 없습니다.' });
+                    .json({ success: false, msg: "카페를 찾을 수 없습니다." });
 
             let updatedAt = Date.now();
 
