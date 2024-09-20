@@ -22,38 +22,40 @@ class _HomeMyState extends State<HomeMy> {
       children: [
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8),
-          child: AspectRatio(
-            aspectRatio: 16 / 9,
+          child: SizedBox(
+            height: 250,
             child: CarouselSlider.builder(
               itemCount: widget.tabList.length,
               itemBuilder: (BuildContext context, int index, int realIndex) {
-                return Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 4.0),
-                  child: Column(
-                    children: [
-                      Expanded(
-                        child: Container(
-                          constraints: const BoxConstraints(
-                            maxHeight: 150, // 원하는 최대 높이 설정
-                          ),
-                          child: Image.asset(
-                            widget.tabList[index]['image']!,
-                            fit: BoxFit.cover,
-                            width: double.infinity,
-                          ),
-                        ),
+                return Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    // SizedBox(
+                    Container(
+                      height: double.maxFinite,
+                      constraints: const BoxConstraints(
+                        minHeight: 100.0,
+                        maxHeight: 200,
                       ),
-                      _buildBottomInfo(widget.tabList[index]),
-                    ],
-                  ),
+                      child: Image.asset(
+                        widget.tabList[index]['image']!,
+                        fit: BoxFit.cover,
+                        width: double.infinity,
+                      ),
+                    ),
+                    SizedBox(
+                      height: 50.0,
+                      child: _buildBottomInfo(widget.tabList[index]),
+                    ),
+                  ],
                 );
               },
               options: CarouselOptions(
-                aspectRatio: 16 / 9,
-                viewportFraction: 0.34, // 슬라이더가 3개 보이도록 설정
+                height: 250.0,
+                viewportFraction: 0.34,
                 enlargeCenterPage: false,
                 enableInfiniteScroll: false,
-                padEnds: false, // 양쪽 끝에 여백을 제거
+                padEnds: false,
                 onPageChanged: (index, reason) {
                   setState(() {
                     _currentIndex = index;
@@ -62,7 +64,7 @@ class _HomeMyState extends State<HomeMy> {
               ),
             ),
           ),
-        )
+        ),
       ],
     );
   }
@@ -71,7 +73,6 @@ class _HomeMyState extends State<HomeMy> {
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 8),
       child: Column(
-        mainAxisSize: MainAxisSize.max,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(

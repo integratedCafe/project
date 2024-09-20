@@ -4,6 +4,7 @@ import 'package:carousel_slider/carousel_slider.dart';
 // Widget
 import 'package:intergrate_cafe/widget/home/home_my.dart';
 import 'package:intergrate_cafe/widget/home/home_near_by.dart';
+import 'package:intergrate_cafe/widget/home/home_user_info.dart';
 
 // Util
 import 'package:intergrate_cafe/util/color.dart';
@@ -88,16 +89,16 @@ class _HomeScreenState extends State<HomeScreen> {
     super.initState();
     // 데이터를 초기화하는 메소드 호출
     print("Init State!");
-    _testLogin();
+    // _testLogin();
   }
 
-  Future<void> _testLogin() async {
-    print('Init Test Login');
-    dynamic res = await ApiService()
-        .post('/user/login', {'phone': '01027977760', 'password': 'password'});
+  // Future<void> _testLogin() async {
+  //   print('Init Test Login');
+  //   dynamic res = await ApiService()
+  //       .post('/user/login', {'phone': '01027977760', 'password': 'password'});
 
-    print('Login Response >>>> $res');
-  }
+  //   print('Login Response >>>> $res');
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -109,7 +110,11 @@ class _HomeScreenState extends State<HomeScreen> {
             const SizedBox(height: 16),
             _buildPromotionCarousel(),
             const SizedBox(height: 32),
-            _buildUserInfoTabBar(context),
+            HomeUserInfo(
+              frequencyImages: frequencyImages,
+              favoriteImages: favoriteImages,
+            ),
+            // _buildUserInfoTabBar(context),
             const SizedBox(height: 32),
             HomeNearBy(nearByList: nearByList)
           ],
@@ -192,100 +197,5 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           ),
         ));
-  }
-
-  Widget _buildUserInfoTabBar(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16.0),
-      child: Container(
-        clipBehavior: Clip.hardEdge,
-        decoration: BoxDecoration(
-          color: Colors.white,
-          boxShadow: [
-            BoxShadow(
-              color: Colors.grey.withOpacity(0.3),
-              spreadRadius: 2,
-              blurRadius: 5,
-              offset: const Offset(0, 3),
-            ),
-          ],
-          borderRadius: const BorderRadius.all(Radius.circular(10)),
-        ),
-        child: DefaultTabController(
-          length: 2,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Padding(
-                padding: EdgeInsets.all(32.0),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      '윤제혁',
-                      style:
-                          TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
-                    ),
-                    Text('내 포인트 1000 점', style: TextStyle(fontSize: 16)),
-                  ],
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: TabBar(
-                        indicatorSize: TabBarIndicatorSize.label,
-                        indicatorColor: ColorH.main(),
-                        indicatorWeight: 3.0,
-                        labelStyle: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                        ),
-                        unselectedLabelColor: Colors.grey,
-                        tabs: const [
-                          Tab(
-                            text: '자주 가는 매장',
-                          ),
-                          Tab(
-                            text: '저장한 메뉴',
-                          ),
-                        ],
-                      ),
-                    ),
-                    TextButton(
-                      onPressed: () {
-                        // 링크 클릭시 액션
-                      },
-                      child: Text(
-                        '전체보기',
-                        style: TextStyle(
-                          color: ColorH.main(),
-                          fontSize: 16,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              Container(
-                constraints: BoxConstraints(
-                  minHeight: 100.0, // 원하는 최소 높이
-                  maxHeight: MediaQuery.of(context).size.height *
-                      0.5, // 화면 높이의 50%까지 확장
-                ),
-                child: TabBarView(
-                  children: [
-                    HomeMy(tabList: frequencyImages, type: 'frequency'),
-                    HomeMy(tabList: favoriteImages, type: 'favorite'),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
   }
 }

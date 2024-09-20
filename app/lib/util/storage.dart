@@ -22,6 +22,8 @@ class SecureStorageHelper {
   Future<dynamic> get(String key) async {
     String? value = await _storage.read(key: key);
 
+    if (value == null) return null;
+
     try {
       return jsonDecode(value);
     } catch (e) {

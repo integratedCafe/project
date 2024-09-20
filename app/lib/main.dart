@@ -6,7 +6,7 @@ import 'package:intergrate_cafe/widget/fnb.dart';
 import 'package:intergrate_cafe/widget/gnb.dart';
 
 // import Screen
-import 'package:intergrate_cafe/screen/home_screen.dart';
+import 'package:intergrate_cafe/screen/home/home_screen.dart';
 
 // import Uitl
 import 'package:intergrate_cafe/util/color.dart';
