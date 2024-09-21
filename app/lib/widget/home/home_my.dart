@@ -30,7 +30,6 @@ class _HomeMyState extends State<HomeMy> {
                 return Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    // SizedBox(
                     Container(
                       height: double.maxFinite,
                       constraints: const BoxConstraints(
