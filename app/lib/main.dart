@@ -8,16 +8,14 @@ import 'package:intergrate_cafe/widget/gnb.dart';
 
 // import Screen
 import 'package:intergrate_cafe/screen/home/home_screen.dart';
+import 'package:intergrate_cafe/screen/cafe/cafe_list.dart';
 
 // import Uitl
 import 'package:intergrate_cafe/util/color.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  print('Main Init!!');
   await dotenv.load(fileName: ".env");
-  // dotenv.testLoad({'BASE_URL': 'localhost:8080'});
-  print(dotenv.env['BASE_URL']); // 환경 변수가 제대로 로드되었는지 확인
 
   runApp(const MyApp());
 }
@@ -36,7 +34,7 @@ class _MyAppState extends State<MyApp> {
 
   static const List<Widget> _widgetOptions = [
     Center(child: HomeScreen()),
-    Center(child: Text('Cafe List Screen')),
+    Center(child: CafeList()),
     Center(child: Text('Order History Screen')),
     Center(child: Text('Settings Screen')),
   ];
@@ -47,11 +45,38 @@ class _MyAppState extends State<MyApp> {
     });
   }
 
+  void navigateToHome(BuildContext context) {
+    setState(() {
+      _selectedIndex = 0;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Intro Screen',
-      home: IntroScreen(),
+      title: 'Caffeine Dev',
+      theme: ThemeData(brightness: Brightness.light),
+      home: Scaffold(
+        appBar: AppBar(
+          backgroundColor: ColorH.main(),
+          elevation: 0,
+          title: Builder(builder: (context) {
+            return Gnb(onNavigateHome: () => navigateToHome(context));
+          }),
+        ),
+        body: _widgetOptions[_selectedIndex],
+        bottomNavigationBar: Fnb(
+          currentIndex: _selectedIndex,
+          onTap: _onItemTapped,
+        ),
+      ),
     );
   }
+  // @override
+  // Widget build(BuildContext context) {
+  //   return MaterialApp(
+  //     title: 'Intro Screen',
+  //     home: IntroScreen(),
+  //   );
+// }
 }
