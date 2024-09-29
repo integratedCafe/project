@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 
 // Widget
+import 'package:intergrate_cafe/widget/common/search_bar.dart'
+    as CommonSearchBar;
 import 'package:intergrate_cafe/widget/home/home_my.dart';
 import 'package:intergrate_cafe/widget/home/home_near_by.dart';
 import 'package:intergrate_cafe/widget/home/home_user_info.dart';
@@ -106,7 +108,8 @@ class _HomeScreenState extends State<HomeScreen> {
       body: SingleChildScrollView(
         child: Column(
           children: [
-            _buildSearchBar(),
+            const CommonSearchBar.SearchBar(),
+            // _buildSearchBar(),
             const SizedBox(height: 16),
             _buildPromotionCarousel(),
             const SizedBox(height: 32),
@@ -123,45 +126,45 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildSearchBar() {
-    return Container(
-      width: double.infinity,
-      decoration: BoxDecoration(
-        color: ColorH.main(),
-        borderRadius: const BorderRadius.only(
-          bottomLeft: Radius.circular(5),
-          bottomRight: Radius.circular(5),
-        ),
-      ),
-      padding: const EdgeInsets.all(8.0),
-      child: Container(
-        decoration: BoxDecoration(
-          boxShadow: [
-            BoxShadow(
-              color: Colors.grey.withOpacity(0.7),
-              spreadRadius: 2,
-              blurRadius: 5,
-              offset: const Offset(0, 3),
-            ),
-          ],
-        ),
-        child: const TextField(
-          decoration: InputDecoration(
-            hintText: '나는 꿀커피가 좋아졌다...',
-            hintStyle: TextStyle(color: Colors.grey),
-            filled: true,
-            fillColor: Colors.white,
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.all(
-                Radius.circular(5),
-              ),
-              borderSide: BorderSide.none,
-            ),
-          ),
-        ),
-      ),
-    );
-  }
+  // Widget _buildSearchBar() {
+  //   return Container(
+  //     width: double.infinity,
+  //     decoration: BoxDecoration(
+  //       color: ColorH.main(),
+  //       borderRadius: const BorderRadius.only(
+  //         bottomLeft: Radius.circular(5),
+  //         bottomRight: Radius.circular(5),
+  //       ),
+  //     ),
+  //     padding: const EdgeInsets.all(8.0),
+  //     child: Container(
+  //       decoration: BoxDecoration(
+  //         boxShadow: [
+  //           BoxShadow(
+  //             color: Colors.grey.withOpacity(0.7),
+  //             spreadRadius: 2,
+  //             blurRadius: 5,
+  //             offset: const Offset(0, 3),
+  //           ),
+  //         ],
+  //       ),
+  //       child: const TextField(
+  //         decoration: InputDecoration(
+  //           hintText: '나는 꿀커피가 좋아졌다...',
+  //           hintStyle: TextStyle(color: Colors.grey),
+  //           filled: true,
+  //           fillColor: Colors.white,
+  //           border: OutlineInputBorder(
+  //             borderRadius: BorderRadius.all(
+  //               Radius.circular(5),
+  //             ),
+  //             borderSide: BorderSide.none,
+  //           ),
+  //         ),
+  //       ),
+  //     ),
+  //   );
+  // }
 
   Widget _buildPromotionCarousel() {
     return Padding(
