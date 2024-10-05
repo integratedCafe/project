@@ -10,7 +10,7 @@ class CafeController {
         try {
             let { id } = req.params;
 
-            const cafe = await Cafe.findById(id);
+            const cafe = await Cafe.findById(id).populate("menus");
 
             if (cafe) {
                 res.status(200).json({
@@ -33,10 +33,7 @@ class CafeController {
             let page = (Number(req.params.page) - 1) * 20;
 
             const cafeCount = await Cafe.countDocuments();
-            const cafeFindResult = await Cafe.find()
-                .skip(page)
-                .limit(20)
-                .sort({ date: -1 });
+            const cafeFindResult = await Cafe.find().skip(page).limit(20).sort({ date: -1 });
 
             res.status(200).json({
                 success: true,
@@ -51,27 +48,15 @@ class CafeController {
     static create = async (req: Request, res: Response) => {
         const { location, name, ownerId, brNumber, phone }: ICafe = req.body;
 
-        if (!location)
-            return res
-                .status(400)
-                .json({ success: false, msg: "위치는 필수항목입니다." });
-        if (!name)
-            return res
-                .status(400)
-                .json({ success: false, msg: "업장명은 필수항목입니다." });
-        if (!ownerId)
-            return res
-                .status(400)
-                .json({ success: false, msg: "업장주 ID값은 필수항목입니다." });
+        if (!location) return res.status(400).json({ success: false, msg: "위치는 필수항목입니다." });
+        if (!name) return res.status(400).json({ success: false, msg: "업장명은 필수항목입니다." });
+        if (!ownerId) return res.status(400).json({ success: false, msg: "업장주 ID값은 필수항목입니다." });
         if (!brNumber)
             return res.status(400).json({
                 success: false,
                 msg: "사업자등록번호는 필수항목입니다.",
             });
-        if (!phone)
-            return res
-                .status(400)
-                .json({ success: false, msg: "휴대폰은 필수항목입니다." });
+        if (!phone) return res.status(400).json({ success: false, msg: "휴대폰은 필수항목입니다." });
 
         const createdData: Partial<ICafeRequest["body"]> = {};
         for (const key in req.body) {
@@ -108,34 +93,18 @@ class CafeController {
     };
 
     static update = async (req: Request, res: Response) => {
-        const { location, name, ownerId, brNumber, phone, brandId }: ICafe =
-            req.body;
+        const { location, name, ownerId, brNumber, phone, brandId }: ICafe = req.body;
 
-        if (!location)
-            return res
-                .status(400)
-                .json({ success: false, msg: "위치는 필수항목입니다." });
-        if (!name)
-            return res
-                .status(400)
-                .json({ success: false, msg: "업장명은 필수항목입니다." });
-        if (!ownerId)
-            return res
-                .status(400)
-                .json({ success: false, msg: "업장주 ID값은 필수항목입니다." });
+        if (!location) return res.status(400).json({ success: false, msg: "위치는 필수항목입니다." });
+        if (!name) return res.status(400).json({ success: false, msg: "업장명은 필수항목입니다." });
+        if (!ownerId) return res.status(400).json({ success: false, msg: "업장주 ID값은 필수항목입니다." });
         if (!brNumber)
             return res.status(400).json({
                 success: false,
                 msg: "사업자등록번호는 필수항목입니다.",
             });
-        if (!phone)
-            return res
-                .status(400)
-                .json({ success: false, msg: "휴대폰은 필수항목입니다." });
-        if (!brandId)
-            return res
-                .status(400)
-                .json({ success: false, msg: "브랜드 ID값은 필수항목입니다." });
+        if (!phone) return res.status(400).json({ success: false, msg: "휴대폰은 필수항목입니다." });
+        if (!brandId) return res.status(400).json({ success: false, msg: "브랜드 ID값은 필수항목입니다." });
 
         const updates: Partial<ICafeRequest["body"]> = {};
         for (const key in req.body) {
@@ -145,10 +114,7 @@ class CafeController {
         }
 
         Cafe.findById(req.params.id).then((cafe) => {
-            if (!cafe)
-                return res
-                    .status(400)
-                    .json({ success: false, msg: "카페를 찾을 수 없습니다." });
+            if (!cafe) return res.status(400).json({ success: false, msg: "카페를 찾을 수 없습니다." });
 
             let updatedAt = Date.now();
 
