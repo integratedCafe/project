@@ -74,7 +74,7 @@ class MenuController {
     };
 
     static update = async (req: Request, res: Response) => {
-        const { name, price, image, options, description }: IMenu = req.body;
+        const { name, price, image = "", options = [], description = "" }: IMenu = req.body;
 
         if (!name) return res.status(400).json({ success: false, msg: "업장명은 필수항목입니다." });
         if (!price) return res.status(400).json({ success: false, msg: "가격은 필수항목입니다." });
