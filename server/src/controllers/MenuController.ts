@@ -44,17 +44,37 @@ class MenuController {
 
     static delete = async (req: Request, res: Response) => {
         try {
-            await Menu.deleteOne({ _id: req.params.id });
+            let { id } = req.params;
 
-            return res.status(200).json({ success: true });
+            await Menu.findById(id).then(async (menu) => {
+                if (!menu) return res.status(400).json({ success: false, msg: "해당 메뉴를 찾지 못했습니다." });
+
+                await Menu.deleteOne({ _id: id }).then(() => {
+                    Cafe.findByIdAndUpdate(menu.cafeId, {
+                        $pull: {
+                            menus: { _id: id },
+                        },
+                    })
+                        .then(() => {
+                            res.status(200).json({ success: true });
+                        })
+                        .catch((err) => {
+                            console.error(err);
+                            res.status(400).json({
+                                success: false,
+                                msg: "메뉴를 삭제하지 못했습니다.",
+                            });
+                        });
+                });
+            });
         } catch (e) {
-            console.log(e);
+            console.error(e);
             return res.status(400).json({ error: e });
         }
     };
 
     static update = async (req: Request, res: Response) => {
-        const { name, price, image, options, description }: IMenu = req.body;
+        const { name, price, image = "", options = [], description = "" }: IMenu = req.body;
 
         if (!name) return res.status(400).json({ success: false, msg: "업장명은 필수항목입니다." });
         if (!price) return res.status(400).json({ success: false, msg: "가격은 필수항목입니다." });
@@ -71,7 +91,13 @@ class MenuController {
                 options,
                 description,
                 updatedAt,
-            });
+            })
+                .then(() => {
+                    res.status(200).json({ success: true });
+                })
+                .catch((err) => {
+                    res.status(400).json({ success: false, msg: err.message });
+                });
         });
     };
 

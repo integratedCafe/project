@@ -1,4 +1,4 @@
-import { Schema, model } from 'mongoose';
+import { Schema, model } from "mongoose";
 
 interface IMenuOption {
     id: string;
@@ -34,7 +34,7 @@ export interface IMenu extends TMenu {}
 
 const MenuSchema: Schema = new Schema<IMenu>({
     name: { type: String, required: true },
-    cafeId: { type: Schema.Types.ObjectId, ref: 'cafe' },
+    cafeId: { type: Schema.Types.ObjectId, ref: "cafe", required: true },
     price: { type: Number, required: true, default: 0 },
     image: { type: String },
     options: [
@@ -49,6 +49,6 @@ const MenuSchema: Schema = new Schema<IMenu>({
     description: { type: String },
 });
 
-const Menu = model<IMenu>('menu', MenuSchema);
+const Menu = model<IMenu>("menu", MenuSchema);
 
 export default Menu;
