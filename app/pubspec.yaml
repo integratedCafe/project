@@ -38,6 +38,8 @@ dependencies:
     flutter_dotenv: ^5.0.2
     http: ^1.2.2
     flutter_secure_storage: ^9.2.2
+    intl: ^0.19.0
+    flutter_riverpod: ^2.6.1
 
 dev_dependencies:
     flutter_test:
@@ -65,12 +67,10 @@ flutter:
         - images/home/banner1.webp
         - images/home/banner2.webp
         - images/home/banner3.webp
-        - images/home/k1.jpg
-        - images/home/k2.jpg
-        - images/home/k3.jpg
         - images/home/c1.jpg
         - images/home/c2.jpg
         - images/home/c3.jpg
+        - images/cafe/temp_americano.jpg
         - .env
     #   - images/a_dot_ham.jpeg
 
