@@ -3,6 +3,9 @@ import 'package:flutter/material.dart';
 // Util
 import 'package:intergrate_cafe/util/api.dart';
 
+// Screen
+import 'package:intergrate_cafe/screen/cafe/cafe_detail.dart';
+
 // Widget
 import 'package:intergrate_cafe/widget/common/search_bar.dart'
     as CommonSearchBar;
@@ -102,6 +105,12 @@ class _CafeListState extends State<CafeList> {
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final itemWidth = (screenWidth - 32) / 3;
+    final itemHeight = itemWidth + 60;
+
+    final childAspectRatio = itemWidth / itemHeight;
+
     return Scaffold(
       appBar: AppBar(
         elevation: 0,
@@ -135,19 +144,33 @@ class _CafeListState extends State<CafeList> {
               padding: const EdgeInsets.all(16),
               child: GridView.builder(
                 controller: _scrollController,
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                   crossAxisCount: 3,
                   crossAxisSpacing: 8.0,
                   mainAxisSpacing: 8.0,
+                  childAspectRatio: childAspectRatio,
                 ),
                 itemCount: _items.length + (_isLoading ? 1 : 0),
                 itemBuilder: (context, index) {
                   if (index == _items.length) {
                     return const Center(child: CircularProgressIndicator());
                   }
-                  return CafeListItem(
-                    name: _items[index]['name'],
-                    location: _items[index]['location'],
+                  return GestureDetector(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => CafeDetail(
+                            id: _items[index]['_id'],
+                            name: _items[index]['name'],
+                          ),
+                        ),
+                      );
+                    },
+                    child: CafeListItem(
+                      name: _items[index]['name'],
+                      location: _items[index]['location'],
+                    ),
                   );
                 },
               ),

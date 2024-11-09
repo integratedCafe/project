@@ -22,12 +22,12 @@ final List<String> promotionImagePaths = [
 ];
 
 final List<Map<String, String>> frequencyImages = [
-  {'image': 'images/home/k1.jpg', 'name': '메머드', 'distance': '136.4m'},
-  {'image': 'images/home/k2.jpg', 'name': '스타벅스', 'distance': '261.2m'},
-  {'image': 'images/home/k3.jpg', 'name': '메가커피', 'distance': '401.4m'},
-  {'image': 'images/home/k1.jpg', 'name': '메머드', 'distance': '421.2m'},
-  {'image': 'images/home/k2.jpg', 'name': '스타벅스', 'distance': '440.9m'},
-  {'image': 'images/home/k3.jpg', 'name': '메가커피', 'distance': '500.5m'},
+  {'image': 'images/home/c1.jpg', 'name': '메머드', 'distance': '136.4m'},
+  {'image': 'images/home/c2.jpg', 'name': '스타벅스', 'distance': '261.2m'},
+  {'image': 'images/home/c3.jpg', 'name': '메가커피', 'distance': '401.4m'},
+  {'image': 'images/home/c1.jpg', 'name': '메머드', 'distance': '421.2m'},
+  {'image': 'images/home/c2.jpg', 'name': '스타벅스', 'distance': '440.9m'},
+  {'image': 'images/home/c3.jpg', 'name': '메가커피', 'distance': '500.5m'},
 ];
 
 final List<Map<String, String>> favoriteImages = [
