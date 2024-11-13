@@ -13,17 +13,16 @@ class CafeController {
 
             const cafe = await Cafe.findById(id).populate("menus");
 
-            if (cafe) {
-                res.status(200).json({
-                    success: true,
-                    cafe,
-                });
-            } else {
-                res.status(400).json({
+            if (!cafe)
+                return res.status(400).json({
                     success: false,
                     msg: "해당 카페를 찾을 수 없습니다.",
                 });
-            }
+
+            res.status(200).json({
+                success: true,
+                cafe,
+            });
         } catch (err) {
             res.status(400).json({ success: false, msg: err });
         }
@@ -68,27 +67,23 @@ class CafeController {
 
         const newCafe = new Cafe(createdData);
 
-        newCafe
-            .save()
-            .then((newcafe) => {
-                User.findByIdAndUpdate(ownerId, { $push: { cafes: newcafe._id } })
-                    .then(() => {
-                        res.status(200).json({ success: true, cafe: newcafe });
-                    })
-                    .catch((err) => {
-                        console.error(err);
-                        res.status(400).json({
-                            success: false,
-                            msg: "카페를 저장하지 못했습니다.",
-                        });
-                    });
-            })
-            .catch(() => {
-                res.status(400).json({
-                    success: false,
-                    msg: "카페를 저장하지 못했습니다.",
-                });
+        let newcafe = await newCafe.save();
+
+        if (!newcafe)
+            return res.status(400).json({
+                success: false,
+                msg: "카페를 저장하지 못했습니다.",
             });
+
+        let updatedUser = await User.findByIdAndUpdate(ownerId, { $push: { cafes: newcafe._id } });
+
+        if (!updatedUser) {
+            return res.status(400).json({
+                success: false,
+                msg: "카페를 저장하지 못했습니다.",
+            });
+        }
+        return res.status(200).json({ success: true, cafe: newcafe });
     };
 
     static delete = async (req: Request, res: Response) => {
@@ -104,7 +99,7 @@ class CafeController {
     };
 
     static update = async (req: Request, res: Response) => {
-        const { location, name }: ICafe = req.body;
+        const { location, name, dayOffWeek, description, openHour, breakTime }: ICafe = req.body;
 
         if (!location) return res.status(400).json({ success: false, msg: "위치는 필수항목입니다." });
         if (!name) return res.status(400).json({ success: false, msg: "업장명은 필수항목입니다." });
@@ -114,7 +109,17 @@ class CafeController {
         if (!cafe) return res.status(400).json({ success: false, msg: "카페를 찾을 수 없습니다." });
         let updatedAt = Date.now();
 
-        let updated = await Cafe.findByIdAndUpdate(req.params.id, { location, name, updatedAt });
+        let updateItems = {
+            location,
+            name,
+            updatedAt,
+            dayOffWeek: dayOffWeek || cafe.dayOffWeek,
+            description: description || cafe.description,
+            openHour: openHour || cafe.openHour,
+            breakTime: breakTime || cafe.breakTime,
+        };
+
+        let updated = await Cafe.findByIdAndUpdate(req.params.id, updateItems);
         if (!updated) return res.status(400).json({ success: false, msg: "카페 내용을 수정하지 못했습니다." });
 
         return res.status(200).json({ success: true });

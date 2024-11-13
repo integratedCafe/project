@@ -1,24 +1,16 @@
 import bcrypt from "bcryptjs";
 import { NextFunction, Request, Response } from "express";
 import jwt from "jsonwebtoken";
+import nodemailer from "nodemailer";
 import config from "../config/index";
 import { CustomRequest } from "../middleware/checkUser";
 import User from "../models/user";
-import nodemailer from "nodemailer";
 
 const { coolsms } = require("coolsms-node-sdk");
 
 // import * as PortOne from "@portone/browser-sdk/v2";
 
-const {
-    JWT_SECRET,
-    COOLSMS_APIKEY,
-    COOLSMS_APIKEY_SECRET,
-    STORE_ID,
-    CHANNEL_KEY,
-    NODEMAILER_USER,
-    NODEMAILER_PASS,
-} = config;
+const { JWT_SECRET, COOLSMS_APIKEY, COOLSMS_APIKEY_SECRET, STORE_ID, CHANNEL_KEY, NODEMAILER_USER, NODEMAILER_PASS } = config;
 
 interface ILoginReq {
     password: string;
@@ -45,13 +37,12 @@ class UserController {
             const user = await User.findById(id).select("-password");
 
             if (!user) {
-                return res
-                    .status(400)
-                    .json({ msg: "유저가 존재하지 않습니다." });
+                return res.status(400).json({ msg: "유저가 존재하지 않습니다." });
             }
 
             res.json({ success: true, user });
-        } catch (e) {
+        } catch (err) {
+            console.error(err);
             res.status(400).json({
                 success: false,
                 msg: "유저를 찾을 수 없습니다.",
@@ -60,57 +51,50 @@ class UserController {
     };
 
     static login = async (req: Request, res: Response, next: NextFunction) => {
-        const { phone, password }: ILoginReq = req.body;
+        try {
+            const { phone, password }: ILoginReq = req.body;
 
-        if (!phone)
-            return res
-                .status(400)
-                .json({ success: false, msg: "휴대폰 번호를 작성해주세요." });
-        else if (!password)
-            return res
-                .status(400)
-                .json({ success: false, msg: "비밀번호를 작성해주세요." });
+            if (!phone) return res.status(400).json({ success: false, msg: "휴대폰 번호를 작성해주세요." });
+            else if (!password) return res.status(400).json({ success: false, msg: "비밀번호를 작성해주세요." });
 
-        User.findOne({ phone }).then((user) => {
+            let user = await User.findOne({ phone });
             if (!user)
                 return res.status(400).json({
                     success: false,
                     msg: "휴대폰 번호 또는 비밀번호를 확인해주세요.",
                 });
 
-            bcrypt.compare(password, user.password).then((isMatch) => {
-                console.log("Compare Password >>>> ");
-                if (!isMatch)
-                    return res.status(400).json({
-                        success: false,
-                        msg: "휴대폰 번호 또는 비밀번호를 확인해주세요.",
-                    });
+            let isMatch = await bcrypt.compare(password, user.password);
+            if (!isMatch)
+                return res.status(400).json({
+                    success: false,
+                    msg: "휴대폰 번호 또는 비밀번호를 확인해주세요.",
+                });
 
-                jwt.sign(
-                    { id: user.id },
-                    JWT_SECRET,
-                    { expiresIn: 36000000 },
-                    (err, token) => {
-                        if (err)
-                            return res
-                                .status(400)
-                                .json({ success: false, msg: err });
+            jwt.sign({ id: user.id }, JWT_SECRET, { expiresIn: 36000000 }, (err, token) => {
+                if (err) return res.status(400).json({ success: false, msg: err });
 
-                        res.json({
-                            success: true,
-                            token,
-                            user,
-                        });
-                    }
-                );
+                res.json({
+                    success: true,
+                    token,
+                    user,
+                });
             });
-        });
+        } catch (err) {
+            console.error(err);
+            res.status(400).json({
+                success: false,
+                msg: "로그인에 실패했습니다.",
+            });
+        }
     };
 
     static register = async (req: Request, res: Response) => {
-        const { email, password, phone, nickname }: IRegisterReq = req.body;
+        try {
+            const { email, password, phone, nickname }: IRegisterReq = req.body;
 
-        User.findOne({ phone }).then((user) => {
+            let user = await User.findOne({ phone });
+
             if (user)
                 return res.status(400).json({
                     success: false,
@@ -125,129 +109,101 @@ class UserController {
             });
 
             bcrypt.genSalt(10, (err, salt) => {
-                bcrypt.hash(newUser.password, salt, (err, hash) => {
+                bcrypt.hash(newUser.password, salt, async (err, hash) => {
                     if (err) return res.status(400).json({ err });
 
                     newUser.password = hash;
-                    newUser.save().then((user) => {
-                        jwt.sign(
-                            { id: user.id },
-                            JWT_SECRET,
-                            { expiresIn: 36000000 },
-                            (err, token) => {
-                                if (err) return res.status(400).json({ err });
+                    let savedUser = await newUser.save();
+                    jwt.sign({ id: savedUser.id }, JWT_SECRET, { expiresIn: 36000000 }, (err, token) => {
+                        if (err) return res.status(400).json({ err });
 
-                                res.json({
-                                    success: true,
-                                    token,
-                                    user,
-                                });
-                            }
-                        );
+                        res.json({
+                            success: true,
+                            token,
+                            user,
+                        });
                     });
                 });
             });
-        });
+        } catch (err) {
+            console.error(err);
+            res.status(400).json({
+                success: false,
+                msg: "회원가입에 실패했습니다.",
+            });
+        }
     };
 
     static updateNickname = async (req: Request, res: Response) => {
-        const { nickname }: IUpdateNicknameReq = req.body;
+        try {
+            const { nickname }: IUpdateNicknameReq = req.body;
 
-        User.findById(req.params.id)
-            .then((foundUser) => {
-                if (!foundUser)
-                    return res.status(400).json({
-                        success: false,
-                        msg: "유저를 찾을 수 없습니다.",
-                    });
+            let foundUser = await User.findById(req.params.id);
 
-                User.findByIdAndUpdate(
-                    req.params.id,
-                    {
-                        nickname,
-                    },
-                    { new: true }
-                )
-                    .select("-password")
-                    .then((user) => {
-                        res.json({ success: true, user });
-                    })
-                    .catch((err) => {
-                        res.status(400).json({ success: false, msg: err.msg });
-                    });
-            })
-            .catch((err) => {
-                let errMsg = err.message;
+            if (!foundUser)
+                return res.status(400).json({
+                    success: false,
+                    msg: "유저를 찾을 수 없습니다.",
+                });
 
-                if (err.name === "CastError")
-                    errMsg = "유저를 찾을 수 없습니다.";
+            let user = await User.findByIdAndUpdate(
+                req.params.id,
+                {
+                    nickname,
+                },
+                { new: true }
+            ).select("-password");
 
-                res.status(400).json({ success: false, msg: errMsg });
+            return res.status(200).json({ success: true, user });
+        } catch (err) {
+            console.error(err);
+            return res.status(400).json({
+                success: false,
+                msg: "닉네임 변경에 실패했습니다.",
             });
+        }
     };
 
     static updatePassword = async (req: Request, res: Response) => {
-        const { password }: IUpdatePasswordReq = req.body;
+        try {
+            const { password }: IUpdatePasswordReq = req.body;
 
-        User.findById(req.params.id)
-            .then((foundUser) => {
-                if (!foundUser)
-                    return res.status(400).json({
-                        success: false,
-                        msg: "유저를 찾을 수 없습니다.",
-                    });
-
-                bcrypt.genSalt(10, (err, salt) => {
-                    bcrypt.hash(password, salt, (err, hash) => {
-                        if (err) return res.status(400).json({ err });
-
-                        User.findByIdAndUpdate(
-                            req.params.id,
-                            {
-                                password: hash,
-                            },
-                            { new: true }
-                        )
-                            .select("-password")
-                            .then((result) => {
-                                res.json({ success: true, user: result });
-                            })
-                            .catch((err) => {
-                                res.status(400).json({
-                                    success: false,
-                                    msg: err.msg,
-                                });
-                            });
-                    });
+            let foundUser = await User.findById(req.params.id);
+            if (!foundUser)
+                return res.status(400).json({
+                    success: false,
+                    msg: "유저를 찾을 수 없습니다.",
                 });
-            })
-            .catch((err) => {
-                let errMsg = err.message;
 
-                if (err.name === "CastError")
-                    errMsg = "유저를 찾을 수 없습니다.";
+            bcrypt.genSalt(10, (err, salt) => {
+                bcrypt.hash(password, salt, async (err, hash) => {
+                    if (err) return res.status(400).json({ err });
 
-                res.status(400).json({ success: false, msg: errMsg });
+                    let result = await User.findByIdAndUpdate(
+                        req.params.id,
+                        {
+                            password: hash,
+                        },
+                        { new: true }
+                    ).select("-password");
+                    res.status(200).json({ success: true, user: result });
+                });
             });
+        } catch (err) {
+            console.error(err);
+            return res.status(400).json({
+                success: false,
+                msg: "비밀번호 변경에 실패했습니다.",
+            });
+        }
     };
 
     static withdrawal = async (req: Request, res: Response) => {
         try {
-            await User.deleteOne({ _id: req.params.id })
-                .then(() => {
-                    res.status(200).json({ success: true });
-                })
-                .catch((err) => {
-                    let errMsg = err.message;
-
-                    if (err.name === "CastError")
-                        errMsg = "ID 값을 확인해주세요.";
-
-                    res.status(400).json({ success: false, msg: errMsg });
-                });
-
-            return;
+            await User.deleteOne({ _id: req.params.id });
+            return res.status(200).json({ success: true });
         } catch (err) {
+            console.error(err);
             return res.status(400).json({ success: false, msg: err });
         }
     };
@@ -290,18 +246,16 @@ class UserController {
             text: `인증번호 [${authNum}]를 입력해주세요.`,
         });
 
-        if (result.statusCode === "2000")
-            return res.status(200).json({ success: true, msg: authNum });
+        if (result.statusCode === "2000") return res.status(200).json({ success: true, msg: authNum });
 
-        return res
-            .status(400)
-            .json({ success: false, msg: "인증 문자 전송 실패" });
+        return res.status(400).json({ success: false, msg: "인증 문자 전송 실패" });
     };
 
     static authEmail = async (req: Request, res: Response) => {
-        const { email } = req.body;
+        try {
+            const { email } = req.body;
 
-        User.findOne({ email }).then(async (user) => {
+            let user = User.findOne({ email });
             if (!user)
                 return res.status(400).json({
                     success: false,
@@ -343,7 +297,10 @@ class UserController {
                 res.send({ success: true, msg: authNum });
                 transporter.close();
             });
-        });
+        } catch (err) {
+            console.error(err);
+            return res.status(400).json({ success: false, msg: "이메일 인증에 실패했습니다." });
+        }
     };
 }
 
