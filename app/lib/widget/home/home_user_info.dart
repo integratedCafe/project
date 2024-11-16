@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intergrate_cafe/util/storage.dart';
 
 // Widget
 import 'package:intergrate_cafe/widget/home/home_my.dart';
@@ -13,109 +14,138 @@ class HomeUserInfo extends StatefulWidget {
   const HomeUserInfo(
       {super.key,
       this.frequencyImages = const [],
-      this.favoriteImages = const []});
+      this.favoriteImages = const []
+      });
 
   @override
   _HomeUserInfoState createState() => _HomeUserInfoState();
 }
 
 class _HomeUserInfoState extends State<HomeUserInfo> {
+  late Map<String, String> userInfo;
+
+  Future<Map<String, String>> _loadUserInfo() async {
+    SecureStorageHelper storageHelper = SecureStorageHelper();
+
+    String userId = await storageHelper.get('userId') ?? '';
+    String nickname = await storageHelper.get('nickname') ?? '';
+    print(userId);
+    print(nickname);
+    return {'userId': userId, 'nickname': nickname};
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16.0),
-      child: Container(
-        height: 410,
-        clipBehavior: Clip.hardEdge,
-        decoration: BoxDecoration(
-          color: Colors.white,
-          boxShadow: [
-            BoxShadow(
-              color: Colors.grey.withOpacity(0.3),
-              spreadRadius: 2,
-              blurRadius: 5,
-              offset: const Offset(0, 3),
-            ),
-          ],
-          borderRadius: const BorderRadius.all(Radius.circular(10)),
-        ),
-        child: DefaultTabController(
-          length: 2,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Padding(
-                  padding: EdgeInsets.symmetric(
-                    vertical: 16.0,
-                    horizontal: 32.0,
+    return FutureBuilder<Map<String, String>>(
+      future: _loadUserInfo(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return CircularProgressIndicator();
+        } else if (snapshot.hasError) {
+          return Text('Error: ${snapshot.error}');
+        } else {
+          Map<String, String> userInfo = snapshot.data!;
+          return Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16.0),
+            child: Container(
+              height: 410,
+              clipBehavior: Clip.hardEdge,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.grey.withOpacity(0.3),
+                    spreadRadius: 2,
+                    blurRadius: 5,
+                    offset: const Offset(0, 3),
                   ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        '윤제혁',
-                        style: TextStyle(
-                            fontSize: 18, fontWeight: FontWeight.w600),
-                      ),
-                      Text('내 포인트 1000 점', style: TextStyle(fontSize: 16)),
-                    ],
-                  )),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                child: Row(
+                ],
+                borderRadius: const BorderRadius.all(Radius.circular(10)),
+              ),
+              child: DefaultTabController(
+                length: 2,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Expanded(
-                      child: TabBar(
-                        indicatorSize: TabBarIndicatorSize.label,
-                        indicatorColor: ColorH.main(),
-                        indicatorWeight: 3.0,
-                        labelStyle: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
+                    Padding(
+                        padding: const EdgeInsets.symmetric(
+                          vertical: 16.0,
+                          horizontal: 32.0,
                         ),
-                        unselectedLabelColor: Colors.grey,
-                        tabs: const [
-                          Tab(
-                            text: '자주 가는 매장',
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              userInfo['nickname'] ?? '닉네임',
+                              style: const TextStyle(
+                                  fontSize: 18, fontWeight: FontWeight.w600),
+                            ),
+                            const Text('내 포인트 1000 점',
+                                style: TextStyle(fontSize: 16)),
+                          ],
+                        )),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: TabBar(
+                              indicatorSize: TabBarIndicatorSize.label,
+                              indicatorColor: ColorH.main(),
+                              indicatorWeight: 3.0,
+                              labelStyle: const TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                              ),
+                              unselectedLabelColor: Colors.grey,
+                              tabs: const [
+                                Tab(
+                                  text: '자주 가는 매장',
+                                ),
+                                Tab(
+                                  text: '저장한 메뉴',
+                                ),
+                              ],
+                            ),
                           ),
-                          Tab(
-                            text: '저장한 메뉴',
+                          TextButton(
+                            onPressed: () {
+                              // 링크 클릭시 액션
+                            },
+                            child: Text(
+                              '전체보기',
+                              style: TextStyle(
+                                color: ColorH.main(),
+                                fontSize: 16,
+                              ),
+                            ),
                           ),
                         ],
                       ),
                     ),
-                    TextButton(
-                      onPressed: () {
-                        // 링크 클릭시 액션
-                      },
-                      child: Text(
-                        '전체보기',
-                        style: TextStyle(
-                          color: ColorH.main(),
-                          fontSize: 16,
+                    Container(
+                        height: double.maxFinite,
+                        constraints: const BoxConstraints(
+                          minHeight: 50.0,
+                          maxHeight: 290,
                         ),
-                      ),
-                    ),
+                        child: TabBarView(
+                          children: [
+                            HomeMy(
+                                tabList: widget.frequencyImages,
+                                type: 'frequency'),
+                            HomeMy(
+                                tabList: widget.favoriteImages,
+                                type: 'favorite'),
+                          ],
+                        )),
                   ],
                 ),
               ),
-              Container(
-                  height: double.maxFinite,
-                  constraints: const BoxConstraints(
-                    minHeight: 50.0,
-                    maxHeight: 290,
-                  ),
-                  child: TabBarView(
-                    children: [
-                      HomeMy(
-                          tabList: widget.frequencyImages, type: 'frequency'),
-                      HomeMy(tabList: widget.favoriteImages, type: 'favorite'),
-                    ],
-                  )),
-            ],
-          ),
-        ),
-      ),
+            ),
+          );
+        }
+      },
     );
   }
 }

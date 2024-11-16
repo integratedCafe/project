@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:intergrate_cafe/util/color.dart';
 
 class Gnb extends StatefulWidget {
-  final VoidCallback onNavigateHome;
-
-  const Gnb({super.key, required this.onNavigateHome});
+  final VoidCallback onNavigate;
+  final String currentPage;
+  const Gnb({super.key, required this.onNavigate,  required this.currentPage});
 
   @override
   _GnbState createState() => _GnbState();
@@ -19,6 +19,10 @@ class _GnbState extends State<Gnb> {
     print('장바구니 아이콘 클릭됨');
   }
 
+  void _onSettingPressed() {
+    print('장바구니 아이콘 클릭됨');
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -30,7 +34,7 @@ class _GnbState extends State<Gnb> {
         mainAxisSize: MainAxisSize.max,
         children: [
           InkWell(
-            onTap: widget.onNavigateHome,
+            onTap: widget.onNavigate,
             child: const Padding(
               padding: EdgeInsets.only(left: 8.0),
               child: Text(
@@ -43,6 +47,7 @@ class _GnbState extends State<Gnb> {
               ),
             ),
           ),
+          if (widget.currentPage == 'home')
           Row(
             children: [
               IconButton(
@@ -57,6 +62,13 @@ class _GnbState extends State<Gnb> {
               ),
             ],
           ),
+          if (widget.currentPage == 'myPage')
+            IconButton(
+              icon: const Icon(Icons.settings,
+                  size: 24, color: Colors.white),
+              onPressed: _onCartPressed,
+            ),
+
         ],
       ),
     );
