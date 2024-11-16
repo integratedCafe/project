@@ -1,3 +1,4 @@
+import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -59,7 +60,8 @@ class _VerificationCodeFieldState extends State<VerificationCodeField> {
         );
       }
     });
-  }  @override
+  }
+  @override
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 10),
@@ -107,6 +109,8 @@ class _VerificationCodeFieldState extends State<VerificationCodeField> {
                           width: 2.0,
                         ),
                       ),
+                      contentPadding: EdgeInsets.symmetric(vertical: 10, horizontal: 10), // 텍스트에 대한 패딩
+
                     ),
                     style: TextStyle(
                       color: Colors.black,
@@ -122,19 +126,23 @@ class _VerificationCodeFieldState extends State<VerificationCodeField> {
             flex: 3,
             child: ElevatedButton(
               onPressed: _sendVerificationCode,
-              child: Text('인증번호 확인',
-                  style: TextStyle(color: Colors.white, fontSize: 18)),
+              child: FittedBox(
+                child: AutoSizeText(
+                  '인증번호 확인',
+                  style: TextStyle(color: Colors.white),
+                  maxLines: 1,
+                ),
+              ),
               style: ElevatedButton.styleFrom(
                 backgroundColor: ColorH.active(),
-                padding: EdgeInsets.symmetric(horizontal: 10, vertical: 15),
+                padding: EdgeInsets.symmetric(horizontal: 10, vertical: 0),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(10),
                 ),
-                minimumSize: Size(double.infinity, 56),
+                fixedSize: Size.fromHeight(48),
               ),
             ),
-          ),
-        ],
+          ),        ],
       ),
     );
   }

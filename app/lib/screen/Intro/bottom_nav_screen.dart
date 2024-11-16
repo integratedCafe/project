@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intergrate_cafe/screen/MyPage/my_page_screen.dart';
 import 'package:intergrate_cafe/screen/home/home_screen.dart';
 import 'package:intergrate_cafe/util/color.dart';
 import 'package:intergrate_cafe/widget/fnb.dart';
@@ -17,7 +18,7 @@ class _BottomNavScreenState extends State<BottomNavScreen> {
     Center(child: HomeScreen()),
     Center(child: Text('Cafe List Screen')),
     Center(child: Text('Order History Screen')),
-    Center(child: Text('Settings Screen')),
+    Center(child: MyPageScreen()),
   ];
 
   void _onItemTapped(int index) {
@@ -32,6 +33,12 @@ class _BottomNavScreenState extends State<BottomNavScreen> {
     });
   }
 
+  void navigateToMyPage(BuildContext context) {
+    setState(() {
+      _selectedIndex = 3;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -39,7 +46,13 @@ class _BottomNavScreenState extends State<BottomNavScreen> {
         backgroundColor: ColorH.main(),
         elevation: 0,
         title: Builder(builder: (context) {
-          return Gnb(onNavigateHome: () => navigateToHome(context));
+          if (_selectedIndex == 3) {
+            return Gnb(onNavigate: () => navigateToMyPage(context)
+              ,currentPage: 'myPage' );
+          } else {
+            return Gnb(onNavigate: () => navigateToHome(context)
+                ,currentPage: 'home');
+          }
         }),
       ),
       body: _widgetOptions[_selectedIndex],
