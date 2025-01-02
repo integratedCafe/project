@@ -57,35 +57,31 @@ class _CafeDetailState extends ConsumerState<CafeDetail>
   Future<void> _getCafeDetail() async {
     try {
       final res = await ApiService().get('/cafe/${widget.id}');
-      print('API Response: $res');
-
       if (res['success']) {
         setState(() {
           cafeData = {
+            'cafe': res['cafe'],
             'menus':
                 List<Map<String, dynamic>>.from(res['cafe']['menus'] ?? []),
             'images': cafeImages['images'],
           };
         });
-
-        print("Cafe Detail >>>>> $cafeData");
       } else {
-        print('API Response >>>>> ${res['message']}');
+        debugPrint('API Error: ${res['message']}');
       }
     } catch (e) {
-      print("Error Cafe Detail API Error >>>> $e");
+      debugPrint('API Exception: $e');
     } finally {
       setState(() {
         isLoading = false;
       });
-      print('Final Cafe Data >>>>>> $cafeData');
     }
   }
 
   @override
   Widget build(BuildContext context) {
     final provider = ref.watch(totalProvider);
-    bool isTotalWidgetShow = provider.isNotEmpty;
+    final bool isTotalWidgetShow = provider.isNotEmpty;
 
     return Scaffold(
       appBar: AppBar(
@@ -118,8 +114,7 @@ class _CafeDetailState extends ConsumerState<CafeDetail>
                             controller: _tabController,
                             children: [
                               CafeDetailMenu(
-                                datas: List<Map<String, dynamic>>.from(
-                                    cafeData['menus'] ?? []),
+                                datas: cafeData, // Map 전달
                               ),
                               const Text('카페 정보'),
                               const Text('카페 리뷰'),
@@ -128,12 +123,14 @@ class _CafeDetailState extends ConsumerState<CafeDetail>
                         ),
                       ],
                     ),
-                    if (isTotalWidgetShow)
+                    if (isTotalWidgetShow && cafeData['cafe'] != null)
                       Positioned(
                         left: MediaQuery.of(context).size.width * 0.2,
                         right: MediaQuery.of(context).size.width * 0.2,
                         bottom: 30.0,
-                        child: const CafeDetailTotal(),
+                        child: CafeDetailTotal(
+                          cafe: cafeData['cafe'],
+                        ),
                       ),
                   ],
                 ),

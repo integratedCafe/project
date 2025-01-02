@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+// Screen
+import 'package:intergrate_cafe/screen/cart/cart.dart';
+
 // Util
 import 'package:intergrate_cafe/util/color.dart';
 import 'package:intergrate_cafe/util/service.dart';
@@ -9,7 +12,9 @@ import 'package:intergrate_cafe/util/service.dart';
 import 'package:intergrate_cafe/provider/cafe/total.dart';
 
 class CafeDetailTotal extends ConsumerStatefulWidget {
-  const CafeDetailTotal({super.key});
+  final Map<String, dynamic> cafe;
+
+  const CafeDetailTotal({super.key, required this.cafe});
 
   @override
   _CafeDetailTotal createState() => _CafeDetailTotal();
@@ -17,14 +22,43 @@ class CafeDetailTotal extends ConsumerStatefulWidget {
 
 class _CafeDetailTotal extends ConsumerState<CafeDetailTotal> {
   @override
+  void initState() {
+    super.initState();
+
+    print('widget cafe >>>> ${widget.cafe}');
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final provider = ref.watch(totalProvider);
-    String total = Service().formatComma(provider.fold(
-        0, (total, item) => (total + (item['price'] * item['qty'])).toInt()));
+    final provider = ref.read(totalProvider);
+    print('provider >>>> $provider');
+
+    int total = 0;
+    if (provider['cafe'] != null && provider['cafe']['menus'] != null) {
+      total = (provider['cafe']['menus'] as List).fold<int>(
+        0,
+        (sum, item) {
+          // isAdd가 true인 항목만 계산에 포함
+          if (item['isAdd'] == true && item['qty'] != null) {
+            final price = (item['price'] as num?)?.toInt() ?? 0;
+            final qty = (item['qty'] as num?)?.toInt() ?? 0;
+            return sum + (price * qty);
+          }
+          return sum;
+        },
+      );
+    }
+
+    // 포맷팅된 문자열로 변환
+    String formattedTotal = Service().formatComma(total);
 
     return GestureDetector(
       onTap: () {
-        print('$total원 담기 Add Button Click!');
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => const Cart()),
+        );
+        // provider = null;
       },
       child: Container(
         width: MediaQuery.of(context).size.width * 0.3,
@@ -43,7 +77,7 @@ class _CafeDetailTotal extends ConsumerState<CafeDetailTotal> {
           ],
         ),
         child: Text(
-          '$total원 담기',
+          '$formattedTotal원 담기',
           style: const TextStyle(
             color: Colors.white,
             fontSize: 14,
