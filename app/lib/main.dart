@@ -2,6 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+// firebase
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
+import 'firebase_options.dart';
+
 import 'package:intergrate_cafe/screen/Intro/intro_screen.dart';
 
 // import Widget
@@ -18,6 +23,18 @@ import 'package:intergrate_cafe/util/color.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await dotenv.load(fileName: ".env");
+  // await Firebase.initializeApp(
+  //   options: DefaultFirebaseOptions.currentPlatform,
+  //   // options: FirebaseOptions(apiKey: apiKey, appId: appId, messagingSenderId: messagingSenderId, projectId: projectId)
+  // );
+
+  // FCM 토큰 가져오기
+  String? fcmToken = await FCMService.initializeAndGetToken();
+  final token = await FirebaseMessaging.instance.getAPNSToken();
+  print("Get TOk: $token");
+  if (fcmToken != null) {
+    print('FCM 토큰: $fcmToken');
+  }
 
   runApp(const ProviderScope(child: MyApp()));
 }

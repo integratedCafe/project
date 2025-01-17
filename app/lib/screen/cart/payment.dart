@@ -11,17 +11,26 @@ import 'package:bootpay/model/stat_item.dart';
 import 'package:bootpay/model/user.dart';
 import 'package:flutter/foundation.dart';
 
+// Screen
+import 'package:intergrate_cafe/screen/home/home_screen.dart';
+
 // Provider
 import 'package:intergrate_cafe/provider/cafe/total.dart';
 
 // Util
 import 'package:intergrate_cafe/util/service.dart';
 
-class Payment extends ConsumerWidget {
-  Payment({super.key});
+class Payment extends ConsumerStatefulWidget {
+  const Payment({super.key});
 
+  @override
+  ConsumerState<Payment> createState() => _PaymentState();
+}
+
+class _PaymentState extends ConsumerState<Payment> {
   Payload payload = Payload();
-  final String _data = ""; // 서버승인을 위해 사용되기 위한 변수
+  late String totalPrice = '0';
+  late List<Map<String, dynamic>> cafeData = [];
 
   String webApplicationId = '676d859731d38115ba3fca27';
   String androidApplicationId = '676d859731d38115ba3fca28';
@@ -32,19 +41,57 @@ class Payment extends ConsumerWidget {
         webApplicationId, androidApplicationId, iosApplicationId);
   }
 
-  bootpayReqeustDataInit() {
-    Item item1 = Item();
-    item1.name = "미키 '마우스"; // 주문정보에 담길 상품명
-    item1.qty = 1; // 해당 상품의 주문 수량
-    item1.id = "ITEM_CODE_MOUSE"; // 해당 상품의 고유 키
-    item1.price = 500; // 상품의 가격
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
 
-    Item item2 = Item();
-    item2.name = "키보드"; // 주문정보에 담길 상품명
-    item2.qty = 1; // 해당 상품의 주문 수량
-    item2.id = "ITEM_CODE_KEYBOARD"; // 해당 상품의 고유 키
-    item2.price = 500; // 상품의 가격
-    List itemList = [item1, item2];
+    final state = ref.watch(totalProvider);
+
+    final cafe = state['cafe'] ?? {};
+    final menus = cafe['menus'] ?? [];
+    print('cart menus >>>>> $menus');
+
+    cafeData = List<Map<String, dynamic>>.from(menus)
+        .where((menu) => (menu['qty'] != null))
+        .toList();
+
+    totalPrice = Service().formatComma(
+      cafeData.fold<int>(
+        0,
+        (int total, dynamic item) {
+          if (item['qty'] != null) {
+            final price = (item['price'] as num?)?.toInt() ?? 0;
+            final qty = (item['qty'] as num?)?.toInt() ?? 0;
+
+            return total + (price * qty);
+          }
+          return total;
+        },
+      ),
+    );
+    bootpayReqeustDataInit();
+  }
+
+  bootpayReqeustDataInit() {
+    final items = cafeData
+        .map((menu) => Item(
+            name: menu['name'],
+            qty: menu['qty'],
+            price: double.tryParse(menu['price'].toString()) ?? 0.0,
+            id: menu['_id']))
+        .toList();
+    // Item item1 = Item();
+    // item1.name = "미키 '마우스"; // 주문정보에 담길 상품명
+    // item1.qty = 1; // 해당 상품의 주문 수량
+    // item1.id = "ITEM_CODE_MOUSE"; // 해당 상품의 고유 키
+    // item1.price = totalPrice; // 상품의 가격
+
+    // Item item2 = Item();
+    // item2.name = "키보드"; // 주문정보에 담길 상품명
+    // item2.qty = 1; // 해당 상품의 주문 수량
+    // item2.id = "ITEM_CODE_KEYBOARD"; // 해당 상품의 고유 키
+    // item2.price = 500; // 상품의 가격
+    // List<Item> itemList = [item1, item2];
 
     print('------- request Init applicationId : $applicationId');
     payload.webApplicationId = webApplicationId; // web application id
@@ -57,7 +104,10 @@ class Payment extends ConsumerWidget {
     // payload.methods = ['card', 'phone', 'vbank', 'bank', 'kakao'];
     payload.methods = ['card', 'kakao'];
     payload.orderName = "테스트 상품"; //결제할 상품명
-    payload.price = 1000.0; //정기결제시 0 혹은 주석
+    print(
+        '------- request Init totalPrice : ${double.tryParse(totalPrice.replaceAll(',', '')) ?? 0.0}');
+    payload.price =
+        double.tryParse(totalPrice.replaceAll(',', '')) ?? 0.0; //정기결제시 0 혹은 주석
 
     payload.orderId = DateTime.now()
         .millisecondsSinceEpoch
@@ -69,7 +119,8 @@ class Payment extends ConsumerWidget {
       "callbackParam3": "value56",
       "callbackParam4": "value78",
     }; // 전달할 파라미터, 결제 후 되돌려 주는 값
-    payload.items = itemList as List<Item>; // 상품정보 배열
+    // payload.items = itemList; // 상품정보 배열
+    payload.items = items; // 상품정보 배열
 
     User user = User(); // 구매자 정보
     user.username = "사용자 이름";
@@ -104,6 +155,7 @@ class Payment extends ConsumerWidget {
         print('------- onCancel: $data');
       },
       onError: (String data) {
+        print('------- goBootpayTest Payload: $payload');
         print('------- onError Applicationb Id: $applicationId');
         print('------- onError: $data');
       },
@@ -134,6 +186,10 @@ class Payment extends ConsumerWidget {
             return false; 후에 서버에서 결제승인 수행
          */
         // checkQtyFromServer(data);
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => const HomeScreen()),
+        );
         return false;
       },
       onDone: (String data) {
@@ -144,13 +200,41 @@ class Payment extends ConsumerWidget {
 
   @override
   void initState() {
-    // TODO: implement initState
-    // super.initState();
-    bootpayReqeustDataInit(); //결제용 데이터 init
+    super.initState();
+    print('------- initState');
+    // TotalProvider의 state를 구독
+    // final state = ref.watch(totalProvider);
+
+    // // state에서 'cafe' 키의 데이터를 가져옴
+    // final cafe = state['cafe'] ?? {};
+    // final menus = cafe['menus'] ?? [];
+    // print('cart menus >>>>> $menus');
+    // // qty > 0인 메뉴 필터링
+    // cafeData = List<Map<String, dynamic>>.from(menus)
+    //     .where((menu) => (menu['qty'] != null))
+    //     .toList();
+
+    // // 총 금액 계산
+    // totalPrice = Service().formatComma(
+    //   cafeData.fold<int>(
+    //     0,
+    //     (int total, dynamic item) {
+    //       if (item['qty'] != null) {
+    //         final price = (item['price'] as num?)?.toInt() ?? 0;
+    //         final qty = (item['qty'] as num?)?.toInt() ?? 0;
+
+    //         return total + (price * qty);
+    //       }
+
+    //       return total;
+    //     },
+    //   ),
+    // );
+    // bootpayReqeustDataInit(); //결제용 데이터 init
   }
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     final provider = ref.watch(totalProvider);
 
     // 총 주문금액 계산
