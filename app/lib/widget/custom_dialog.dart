@@ -1,22 +1,22 @@
 import 'package:flutter/material.dart';
-
-void showAlertDialog(BuildContext context) {
-  showDialog(
+Future<bool> showAlertDialog(BuildContext context) async {
+  bool? result = await showDialog<bool>(
     context: context,
     builder: (BuildContext context) {
       return AlertDialog(
         title: Text(''),
-        content: Text('어서와요. \n이제 못나가요'),
+        content: Text('해당 정보로 회원가입하시겠습니까?'),
         actions: <Widget>[
           TextButton(
             onPressed: () {
-              Navigator.of(context).pop();
+              Navigator.of(context).pop(true);
             },
-            child: Text('서비스 이용하기'),
+            child: Text('회원가입'),
           ),
           TextButton(
             onPressed: () {
-              Navigator.of(context).pop();
+              // 취소 후 false 반환
+              Navigator.of(context).pop(false);
             },
             child: Text('취소'),
           ),
@@ -24,4 +24,7 @@ void showAlertDialog(BuildContext context) {
       );
     },
   );
+
+  return result ?? false;
 }
+

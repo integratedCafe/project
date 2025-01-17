@@ -69,33 +69,33 @@ class _MyAppState extends State<MyApp> {
       _selectedIndex = 0;
     });
   }
-
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Caffeine Dev',
-      theme: ThemeData(brightness: Brightness.light),
-      home: Scaffold(
-        appBar: AppBar(
-          backgroundColor: ColorH.main(),
-          elevation: 0,
-          title: Builder(builder: (context) {
-            return Gnb(onNavigateHome: () => navigateToHome(context));
-          }),
-        ),
-        body: _widgetOptions[_selectedIndex],
-        bottomNavigationBar: Fnb(
-          currentIndex: _selectedIndex,
-          onTap: _onItemTapped,
-        ),
-      ),
-    );
-  }
+  //
   // @override
   // Widget build(BuildContext context) {
   //   return MaterialApp(
-  //     title: 'Intro Screen',
-  //     home: IntroScreen(),
+  //     title: 'Caffeine Dev',
+  //     theme: ThemeData(brightness: Brightness.light),
+  //     home: Scaffold(
+  //       appBar: AppBar(
+  //         backgroundColor: ColorH.main(),
+  //         elevation: 0,
+  //         title: Builder(builder: (context) {
+  //           return Gnb(onNavigateHome: () => navigateToHome(context));
+  //         }),
+  //       ),
+  //       body: _widgetOptions[_selectedIndex],
+  //       bottomNavigationBar: Fnb(
+  //         currentIndex: _selectedIndex,
+  //         onTap: _onItemTapped,
+  //       ),
+  //     ),
   //   );
-// }
+  // }
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'Intro Screen',
+      home: IntroScreen(),
+    );
+}
 }

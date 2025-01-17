@@ -11,7 +11,7 @@ class Fnb extends StatelessWidget {
     {'icon': Icons.home, 'label': '홈'},
     {'icon': Icons.local_cafe, 'label': '카페리스트'},
     {'icon': Icons.receipt_long, 'label': '주문내역'},
-    {'icon': Icons.settings, 'label': '설정'},
+    {'icon': Icons.person, 'label': '마이페이지'},
   ];
 
   @override

@@ -1,7 +1,12 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:intergrate_cafe/screen/Intro/bottom_nav_screen.dart';
 import 'package:intergrate_cafe/screen/Intro/signin_screen.dart';
+import 'package:intergrate_cafe/util/api.dart';
 import 'package:intergrate_cafe/util/color.dart';
+import 'package:intergrate_cafe/util/storage.dart';
 
 class IntroScreen extends StatefulWidget {
   @override
@@ -9,16 +14,16 @@ class IntroScreen extends StatefulWidget {
 }
 
 class _PasswordVisible extends State<IntroScreen> {
-  late int _selectedIndex;
+  ApiService apiService = ApiService();
   bool _obscureText = true;
-  final TextEditingController _passwordController = TextEditingController();
+  final TextEditingController phoneController = TextEditingController();
+  final TextEditingController passwordController = TextEditingController();
   DateTime? _lastPressedAt;
 
   Future<bool> _onWillPop() async {
     DateTime now = DateTime.now();
     if (_lastPressedAt == null ||
         now.difference(_lastPressedAt!) > Duration(seconds: 2)) {
-      // 두 번 클릭 -> 종료
       _lastPressedAt = now;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -30,13 +35,12 @@ class _PasswordVisible extends State<IntroScreen> {
     }
     return Future.value(true);
   }
+
   void _togglePasswordVisibility() {
     setState(() {
       _obscureText = !_obscureText;
     });
   }
-
-
 
   @override
   Widget build(BuildContext context) {
@@ -57,6 +61,7 @@ class _PasswordVisible extends State<IntroScreen> {
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 10),
                 child: TextFormField(
+                  controller: phoneController,
                   decoration: InputDecoration(
                     hintText: '아이디를 입력해주세요',
                     hintStyle: TextStyle(color: Color(0xFFB0B0B0)),
@@ -83,7 +88,7 @@ class _PasswordVisible extends State<IntroScreen> {
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 10),
                 child: TextFormField(
-                  controller: _passwordController,
+                  controller: passwordController,
                   decoration: InputDecoration(
                     hintText: '비밀번호를 입력해주세요',
                     hintStyle: TextStyle(color: Color(0xFFB0B0B0)),
@@ -119,20 +124,29 @@ class _PasswordVisible extends State<IntroScreen> {
                 child: SizedBox(
                   width: double.infinity,
                   child: ElevatedButton(
-                    onPressed: () {
-                      Navigator.pushReplacement(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => BottomNavScreen(),
-                        ),
-                      );
+                    onPressed: () async {
+                      try {
+                        await login(context);
+
+                      } catch (e) {
+                        String message ="기타 오류가 발생했습니다.";
+
+                        // 로그인 실패 시 SnackBar로 메시지 표시
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(message),
+                            backgroundColor: Colors.red,
+                            duration: const Duration(seconds: 2),
+                          ),
+                        );
+                      }
                     },
                     child: Text('로그인',
                         style: TextStyle(color: Colors.white, fontSize: 18)),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: ColorH.main(),
                       padding:
-                      EdgeInsets.symmetric(horizontal: 40, vertical: 15),
+                          EdgeInsets.symmetric(horizontal: 40, vertical: 15),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(10),
                       ),
@@ -183,4 +197,56 @@ class _PasswordVisible extends State<IntroScreen> {
       ),
     );
   }
+
+  Future<Map<String, dynamic>> login(BuildContext context) async {
+    String endpoint = '/user/login';
+    Map<String, dynamic> data = {
+      "phone": phoneController.text,
+      "password": passwordController.text,
+    };
+
+    Map<String, dynamic> result = await apiService.post(endpoint, data);
+    print(result['success']);
+    if (result['success'] == false) {
+      String message = result['msg'] ?? "오류가 발생했습니다.";
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(message),
+          backgroundColor: Colors.red,
+          duration: const Duration(seconds: 2),
+        ),
+      );
+    } else {
+      saveLoginData(result);
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (context) => BottomNavScreen(),
+        ),
+      );
+    }
+
+    return result;
+  }
+
+
+  Future<void> saveLoginData(Map<String, dynamic> result) async {
+    SecureStorageHelper storageHelper = SecureStorageHelper();
+    await storageHelper.set('success', result['success']);
+    await storageHelper.set('token', result['token']);
+
+    Map<String, dynamic> user = result['user'];
+    await storageHelper.set('userId', user['_id']);
+    await storageHelper.set('nickname', user['nickname']);
+    await storageHelper.set('email', user['email']);
+    await storageHelper.set('phone', user['phone']);
+    await storageHelper.set('loginWay', user['loginWay']);
+    await storageHelper.set('marketing', user['marketing'].toString());
+    await storageHelper.set('appPush', user['appPush'].toString());
+    await storageHelper.set('locAgreement', user['locAgreement'].toString());
+    await storageHelper.set('isOwner', user['isOwner'].toString());
+
+  }
+
 }

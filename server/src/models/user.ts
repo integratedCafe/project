@@ -1,4 +1,4 @@
-import { Schema, model } from 'mongoose';
+import { Schema, model } from "mongoose";
 
 export type TUser = {
     nickname?: string;
@@ -17,6 +17,7 @@ export type TUser = {
     likedMenus?: Schema.Types.ObjectId[];
     notifications: Schema.Types.ObjectId[];
     brNumber?: string;
+    cafes: Schema.Types.ObjectId[];
 };
 
 /**
@@ -38,6 +39,7 @@ export type TUser = {
  * @param likedMenus?: Schema.Types.ObjectId;
  * @param notifications: Schema.Types.ObjectId[];
  * @param brNumber?: string;
+ * @param cafes?: Schema.Types.ObjectId[];
  */
 
 export interface IUser extends TUser {}
@@ -49,22 +51,23 @@ const UserSchema: Schema = new Schema<IUser>({
     phone: { type: String, required: true, unique: true },
     loginWay: {
         type: String,
-        enum: ['phone', 'kakao', 'google', 'apple', 'naver'],
-        default: 'phone',
+        enum: ["phone", "kakao", "google", "apple", "naver"],
+        default: "phone",
     },
     marketing: { type: Boolean, default: false },
     appPush: { type: Boolean, default: false },
     locAgreement: { type: Boolean, default: false },
     isOwner: { type: Boolean, default: false },
-    freqCafes: [{ type: Schema.Types.ObjectId, ref: 'cafe' }],
-    likedCafes: [{ type: Schema.Types.ObjectId, ref: 'cafe' }],
-    cart: { type: Schema.Types.ObjectId, ref: 'cart' },
-    orders: [{ type: Schema.Types.ObjectId, ref: 'order' }],
-    likedMenus: [{ type: Schema.Types.ObjectId, ref: 'menu' }],
-    notifications: [{ type: Schema.Types.ObjectId, ref: 'notification' }],
+    freqCafes: [{ type: Schema.Types.ObjectId, ref: "cafe" }],
+    likedCafes: [{ type: Schema.Types.ObjectId, ref: "cafe" }],
+    cart: { type: Schema.Types.ObjectId, ref: "cart" },
+    orders: [{ type: Schema.Types.ObjectId, ref: "order" }],
+    likedMenus: [{ type: Schema.Types.ObjectId, ref: "menu" }],
+    notifications: [{ type: Schema.Types.ObjectId, ref: "notification" }],
     brNumber: { type: String },
+    cafes: [{ type: Schema.Types.ObjectId, ref: "cafe" }],
 });
 
-const User = model<IUser>('user', UserSchema);
+const User = model<IUser>("user", UserSchema);
 
 export default User;

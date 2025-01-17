@@ -14,4 +14,6 @@ router.post("/", asyncHandler(CafeController.create));
 router.put("/:id", asyncHandler(CafeController.update));
 router.delete("/:id", asyncHandler(CafeController.delete));
 
+router.get("/myowns/:id", asyncHandler(CafeController.getMyCafes));
+
 export default router;
